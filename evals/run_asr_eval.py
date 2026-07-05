@@ -28,13 +28,15 @@ def _term_accuracy(references: list[str], hypotheses: list[str], terms: list[str
     return out
 
 
-def _transcribe_all(model_name_or_dir: str, files: list[str]) -> list[str]:
+def _transcribe_all(
+    model_name_or_dir: str, files: list[str], hotwords: str | None = None
+) -> list[str]:
     from faster_whisper import WhisperModel
 
     model = WhisperModel(model_name_or_dir, compute_type="auto")
     hyps = []
     for f in files:
-        segments, _ = model.transcribe(f, language="en")
+        segments, _ = model.transcribe(f, language="en", hotwords=hotwords)
         hyps.append(" ".join(s.text.strip() for s in segments))
     return hyps
 
@@ -50,18 +52,27 @@ def run() -> dict:
     agent_cfg = load_config("agent")["server"]
     files = [r["audio_path"] for r in rows]
     refs = [r["transcript"] for r in rows]
+    vocab = cfg["data"]["custom_vocab"]
+    hotwords = " ".join(vocab)
 
     base_name = cfg["model"]["base"].split("/")[-1].replace("whisper-", "")
+    # Three-way comparison: hotword biasing is the free win, fine-tuning must
+    # beat base+hotwords (not just base) to justify itself.
+    variants = [
+        ("base", base_name, None),
+        ("base_hotwords", base_name, hotwords),
+        ("finetuned", agent_cfg["asr_model_dir"], hotwords),
+    ]
     results: dict = {"n": len(rows)}
-    for label, model_id in [("base", base_name), ("finetuned", agent_cfg["asr_model_dir"])]:
+    for label, model_id, hw in variants:
         if label == "finetuned" and not Path(model_id).exists():
             results["finetuned"] = {"skipped": f"{model_id} not found — run make export-asr"}
             continue
-        hyps = _transcribe_all(model_id, files)
+        hyps = _transcribe_all(model_id, files, hotwords=hw)
         results[label] = {
             "wer": round(jiwer.wer(refs, hyps), 4),
             "cer": round(jiwer.cer(refs, hyps), 4),
-            "term_accuracy": _term_accuracy(refs, hyps, cfg["data"]["custom_vocab"]),
+            "term_accuracy": _term_accuracy(refs, hyps, vocab),
         }
     return results
 

@@ -33,13 +33,25 @@ def _load_model():
     return WhisperModel(cfg["asr_fallback"], compute_type="auto"), cfg["asr_fallback"]
 
 
+@functools.lru_cache(maxsize=1)
+def _hotwords() -> str | None:
+    """Custom-vocab decoding bias — free accuracy on rare terms (WATonomous,
+    Reparo, ...) for any speaker, with or without the fine-tuned model."""
+    if not load_config("agent")["server"].get("hotwords_from_vocab", False):
+        return None
+    vocab = load_config("asr_finetune")["data"].get("custom_vocab", [])
+    return " ".join(vocab) or None
+
+
 def transcribe(audio: str | Path | bytes) -> Transcription:
     """Transcribe a file path or raw 16kHz mono PCM/wav bytes."""
     import io
 
     model, name = _load_model()
     source = io.BytesIO(audio) if isinstance(audio, bytes) else str(audio)
-    segments, _info = model.transcribe(source, language="en", vad_filter=True)
+    segments, _info = model.transcribe(
+        source, language="en", vad_filter=True, hotwords=_hotwords()
+    )
     segs = [
         {
             "text": s.text.strip(),

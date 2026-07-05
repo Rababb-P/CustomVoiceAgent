@@ -1,20 +1,143 @@
-"""Prepare personal recordings for Whisper fine-tuning.
+"""Build the Whisper fine-tuning dataset.
 
-Pipeline: raw recordings -> <=30s segments, 16kHz mono -> bootstrap transcripts with
-base Whisper -> hand-correctable TSV -> HF Dataset on disk.
+Primary path (no recordings needed): --synthetic
+    Assembles the HF DatasetDict from the synthetic multi-voice renders
+    (src.asr.gen_sentences + src.asr.synthesize), a TechVoice real-speaker
+    mix-in, and a Common Voice slice. Also regenerates data/evals/asr_eval.jsonl
+    with real-speaker (TechVoice held-out) and cross-voice (synth val) rows.
 
-Run twice: first pass writes transcripts.tsv with Whisper's guesses; you correct the
-`transcript` column by hand (especially custom vocab), then the second pass — with
---from-tsv — builds the final dataset from your corrections.
+Legacy path (your own voice):
+    default:     segment raw recordings + bootstrap transcripts into a TSV
+    --from-tsv:  build the dataset from the hand-corrected TSV
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import json
 from pathlib import Path
 
-from src.config import load_config
+from src.config import ROOT, load_config
+
+# --------------------------------------------------------------- shared helpers
+
+
+def _load_common_voice(cfg: dict, n: int):
+    """Streamed slice of Common Voice as a Dataset, or None if disabled."""
+    cv_cfg = cfg["data"].get("common_voice", {})
+    if not cv_cfg.get("enabled") or n <= 0:
+        return None
+    from datasets import Audio, Dataset, load_dataset
+
+    cv = load_dataset(cv_cfg["dataset"], cv_cfg["language"], split="train", streaming=True)
+    rows = {"audio": [], "transcript": []}
+    for ex in cv.take(n):
+        rows["audio"].append(ex["audio"])
+        rows["transcript"].append(ex["sentence"])
+    ds = Dataset.from_dict(rows).cast_column(
+        "audio", Audio(sampling_rate=cfg["data"]["sample_rate"])
+    )
+    print(f"Mixed in {len(ds)} Common Voice examples.")
+    return ds
+
+
+def _save_dataset(train, val, cfg: dict) -> None:
+    from datasets import DatasetDict
+
+    out = Path(cfg["data"]["processed_dir"]) / "hf_dataset"
+    DatasetDict({"train": train, "validation": val}).save_to_disk(str(out))
+    print(f"Saved dataset: train={len(train)} val={len(val)} -> {out}")
+
+
+# --------------------------------------------------------------- synthetic path
+
+
+def _load_techvoice(cfg: dict):
+    """Returns (train Dataset | None, eval rows for asr_eval.jsonl)."""
+    tv_cfg = cfg["data"].get("techvoice", {})
+    if not tv_cfg.get("enabled"):
+        return None, []
+    import soundfile as sf
+    from datasets import Audio, load_dataset
+
+    ds = load_dataset(tv_cfg["dataset"], split="train")
+    text_col = next(c for c in ("text", "sentence", "transcript") if c in ds.column_names)
+    ds = ds.cast_column("audio", Audio(sampling_rate=cfg["data"]["sample_rate"]))
+    ds = ds.shuffle(seed=42)
+
+    n_train = int(len(ds) * tv_cfg.get("train_fraction", 0.7))
+    train = ds.select(range(n_train)).rename_column(text_col, "transcript")
+    train = train.select_columns(["audio", "transcript"])
+
+    # Held-out portion -> local wavs + eval rows (real unseen-speaker test set).
+    heldout_dir = ROOT / cfg["data"]["processed_dir"] / "heldout"
+    heldout_dir.mkdir(parents=True, exist_ok=True)
+    eval_rows = []
+    for i in range(n_train, len(ds)):
+        ex = ds[i]
+        path = heldout_dir / f"techvoice_{i:04d}.wav"
+        if not path.exists():
+            sf.write(path, ex["audio"]["array"], ex["audio"]["sampling_rate"])
+        eval_rows.append(
+            {
+                "audio_path": str(path.relative_to(ROOT)).replace("\\", "/"),
+                "transcript": ex[text_col],
+                "source": "techvoice",
+            }
+        )
+    print(f"TechVoice: {len(train)} train, {len(eval_rows)} held out for eval.")
+    return train, eval_rows
+
+
+def build_synthetic(cfg: dict) -> None:
+    from datasets import Audio, Dataset, concatenate_datasets
+
+    syn_dir = ROOT / cfg["data"]["synthetic"]["out_dir"]
+    manifest_path = syn_dir / "synth_manifest.jsonl"
+    if not manifest_path.exists():
+        raise SystemExit(f"{manifest_path} missing — run gen_sentences then synthesize first")
+    manifest = [
+        json.loads(line) for line in manifest_path.read_text(encoding="utf-8").splitlines()
+    ]
+
+    def to_dataset(rows: list[dict]) -> Dataset:
+        return Dataset.from_dict(
+            {
+                "audio": [str(ROOT / r["audio_path"]) for r in rows],
+                "transcript": [r["text"] for r in rows],
+            }
+        ).cast_column("audio", Audio(sampling_rate=cfg["data"]["sample_rate"]))
+
+    synth_train = to_dataset([r for r in manifest if r["split"] == "train"])
+    synth_val_rows = [r for r in manifest if r["split"] == "val"]
+    val = to_dataset(synth_val_rows)
+
+    parts = [synth_train]
+    tv_train, tv_eval_rows = _load_techvoice(cfg)
+    if tv_train is not None:
+        parts.append(tv_train)
+
+    cv = _load_common_voice(cfg, len(synth_train) * cfg["data"]["common_voice"]["multiplier"])
+    if cv is not None:
+        parts.append(cv)
+
+    train = concatenate_datasets(parts).shuffle(seed=42)
+    _save_dataset(train, val, cfg)
+
+    # Regenerate the ASR eval fixture: real-speaker + cross-voice rows.
+    eval_rows = tv_eval_rows + [
+        {"audio_path": r["audio_path"], "transcript": r["text"], "source": "synth_heldout"}
+        for r in synth_val_rows
+    ]
+    eval_path = ROOT / "data" / "evals" / "asr_eval.jsonl"
+    with open(eval_path, "w", encoding="utf-8") as f:
+        for row in eval_rows:
+            f.write(json.dumps(row) + "\n")
+    print(f"Wrote {len(eval_rows)} eval rows -> {eval_path}")
+
+
+# ------------------------------------------------------ legacy own-voice path
 
 
 def segment_audio(raw_dir: Path, out_dir: Path, max_seconds: int, sample_rate: int) -> list[Path]:
@@ -28,7 +151,6 @@ def segment_audio(raw_dir: Path, out_dir: Path, max_seconds: int, sample_rate: i
         if src.suffix.lower() not in {".wav", ".mp3", ".m4a", ".flac", ".ogg"}:
             continue
         audio, _ = librosa.load(src, sr=sample_rate, mono=True)
-        # Split on silence, then greedily pack intervals up to max_seconds.
         intervals = librosa.effects.split(audio, top_db=35)
         max_samples = max_seconds * sample_rate
         cur_start, cur_end, idx = None, None, 0
@@ -58,7 +180,7 @@ def bootstrap_transcripts(segments: list[Path], tsv_path: Path) -> None:
     tsv_path.parent.mkdir(parents=True, exist_ok=True)
     with open(tsv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f, delimiter="\t")
-        writer.writerow(["audio_path", "transcript", "corrected"])  # flip corrected to 1 as you fix
+        writer.writerow(["audio_path", "transcript", "corrected"])
         for seg in segments:
             result, _ = model.transcribe(str(seg), language="en")
             text = " ".join(s.text.strip() for s in result)
@@ -67,9 +189,9 @@ def bootstrap_transcripts(segments: list[Path], tsv_path: Path) -> None:
     print(f"\nWrote {tsv_path}. Hand-correct the transcript column, then rerun with --from-tsv.")
 
 
-def build_dataset(cfg: dict) -> None:
-    """Corrected TSV (+ optional Common Voice mix-in) -> HF DatasetDict on disk."""
-    from datasets import Audio, Dataset, DatasetDict, load_dataset
+def build_from_tsv(cfg: dict) -> None:
+    """Corrected TSV (+ Common Voice mix-in) -> DatasetDict. Legacy own-voice path."""
+    from datasets import Audio, Dataset, concatenate_datasets
 
     data_cfg = cfg["data"]
     tsv_path = Path(data_cfg["transcripts_tsv"])
@@ -84,49 +206,35 @@ def build_dataset(cfg: dict) -> None:
         {"audio": [r["audio_path"] for r in rows], "transcript": [r["transcript"] for r in rows]}
     ).cast_column("audio", Audio(sampling_rate=data_cfg["sample_rate"]))
 
-    # Stratified-ish split: ensure each custom-vocab term lands in both splits when possible.
     vocab = [t.lower() for t in data_cfg.get("custom_vocab", [])]
-    val_frac = data_cfg.get("val_fraction", 0.1)
-    split = personal.train_test_split(test_size=val_frac, seed=42)
+    split = personal.train_test_split(test_size=data_cfg.get("val_fraction", 0.1), seed=42)
     train, val = split["train"], split["test"]
     val_text = " ".join(val["transcript"]).lower()
     missing = [t for t in vocab if t not in val_text]
     if missing:
         print(f"NOTE: custom vocab missing from val split: {missing} — record more examples.")
 
-    cv_cfg = data_cfg.get("common_voice", {})
-    if cv_cfg.get("enabled"):
-        n_cv = min(len(train) * cv_cfg.get("multiplier", 5), 20000)
-        cv = load_dataset(cv_cfg["dataset"], cv_cfg["language"], split="train", streaming=True)
-        cv_rows = {"audio": [], "transcript": []}
-        for ex in cv.take(n_cv):
-            cv_rows["audio"].append(ex["audio"])
-            cv_rows["transcript"].append(ex["sentence"])
-        cv_ds = Dataset.from_dict(cv_rows).cast_column(
-            "audio", Audio(sampling_rate=data_cfg["sample_rate"])
-        )
-        from datasets import concatenate_datasets
-
-        train = concatenate_datasets([train, cv_ds]).shuffle(seed=42)
-        print(f"Mixed in {len(cv_ds)} Common Voice examples.")
-
-    out = Path(data_cfg["processed_dir"]) / "hf_dataset"
-    DatasetDict({"train": train, "validation": val}).save_to_disk(str(out))
-    print(f"Saved dataset: train={len(train)} val={len(val)} -> {out}")
+    cv = _load_common_voice(cfg, len(train) * data_cfg["common_voice"]["multiplier"])
+    if cv is not None:
+        train = concatenate_datasets([train, cv]).shuffle(seed=42)
+    _save_dataset(train, val, cfg)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/asr_finetune.yaml")
-    parser.add_argument(
-        "--from-tsv",
-        action="store_true",
-        help="skip segmentation/bootstrap; build dataset from the corrected TSV",
-    )
+    parser.add_argument("--synthetic", action="store_true",
+                        help="build from synthetic renders + TechVoice + Common Voice")
+    parser.add_argument("--from-tsv", action="store_true",
+                        help="legacy: build from the hand-corrected TSV")
     args = parser.parse_args()
     cfg = load_config(args.config)
 
-    if not args.from_tsv:
+    if args.synthetic:
+        build_synthetic(cfg)
+    elif args.from_tsv:
+        build_from_tsv(cfg)
+    else:
         segs = segment_audio(
             Path(cfg["data"]["raw_dir"]),
             Path(cfg["data"]["processed_dir"]) / "segments",
@@ -135,8 +243,6 @@ def main() -> None:
         )
         print(f"Segmented into {len(segs)} clips.")
         bootstrap_transcripts(segs, Path(cfg["data"]["transcripts_tsv"]))
-    else:
-        build_dataset(cfg)
 
 
 if __name__ == "__main__":

@@ -34,3 +34,6 @@ server:
   barge_in: false           # stretch: cancel TTS when user speaks mid-answer
   asr_model_dir: models/whisper-personal-ct2
   asr_fallback: small       # base faster-whisper model if fine-tuned export missing
+  # Bias decoding toward configs/asr_finetune.yaml custom_vocab (faster-whisper
+  # hotwords). Free accuracy on rare terms, works with base and fine-tuned models.
+  hotwords_from_vocab: true

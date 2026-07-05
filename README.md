@@ -3,8 +3,9 @@
 A voice-to-voice AI that answers questions about me, as me — grounded in my
 actual resume and project history, and unable to make things up.
 
-Speak into a mic; a Whisper model **fine-tuned on my own speech** transcribes it,
-a **LangGraph agent** retrieves facts from a personal corpus via RAG, layered
+Speak into a mic; a Whisper model **fine-tuned on synthetic multi-voice data for
+my domain vocabulary** transcribes it, a **LangGraph agent** retrieves facts
+from a personal corpus via RAG, layered
 **guardrails** block prompt injection and hallucinated claims, and a **fully
 local TTS engine** speaks the answer back. Total API cost: **$0** — everything
 runs locally except the LLM, which rides the Gemini free tier behind a
@@ -21,13 +22,19 @@ rate-limited, disk-cached client I wrote to make that survivable.
 
 ## Why this project is interesting (the 60-second tour)
 
-**1. Custom ASR, not an API call.** I fine-tune `whisper-small` with LoRA
-(PEFT, r=32 on attention projections) on 1–2 hours of my own recordings, mixed
-with Common Voice so it doesn't forget general English. The win is measurable:
-WER on a held-out set of my speech, with a per-term report on vocabulary base
-Whisper mangles ("WATonomous", "Reparo", "YOLOv11"). The trained adapter is
-merged and exported to CTranslate2 so it runs through faster-whisper at
-real-time speeds. ([src/asr/](src/asr/))
+**1. Custom ASR, not an API call.** Base Whisper mangles my domain vocabulary —
+"WATonomous", "Reparo", "YOLOv11" — which poisons retrieval before the agent
+even starts. No public dataset contains those words, so I *generate* one:
+LLM-written sentences using the vocab, rendered by a dozen different local TTS
+voices with speed/noise augmentation, mixed with real human tech speech
+([TechVoice](https://huggingface.co/datasets/danielrosehill/TechVoice), MIT) and
+Common Voice so it generalizes past TTS artifacts and doesn't forget English.
+Then `whisper-small` is fine-tuned with LoRA (PEFT, r=32 on attention
+projections), merged, and exported to CTranslate2 for real-time inference. The
+eval is honest: validation uses *held-out sentences spoken by held-out voices*,
+plus real held-out TechVoice audio, and the fine-tune must beat not just base
+Whisper but **base + hotword biasing** (the cheap trick, also implemented) to
+justify existing. ([src/asr/](src/asr/))
 
 **2. The agent can't hallucinate my life.** It's not a stuffed prompt — it's a
 LangGraph state machine where retrieval is a tool call and *guards are graph
@@ -65,7 +72,7 @@ behind a config flag if I ever want it to sound like me.
 | Path | What it is |
 |---|---|
 | [src/llm.py](src/llm.py) | Shared Gemini client: RPM limiter, backoff, disk cache |
-| [src/asr/](src/asr/) | Whisper LoRA fine-tune: data prep → train → CT2 export → transcribe |
+| [src/asr/](src/asr/) | Whisper LoRA fine-tune: synth data gen → train → CT2 export → transcribe |
 | [src/rag/](src/rag/) | Markdown corpus → header-aware chunks → bge-small embeddings → Chroma |
 | [src/agent/](src/agent/) | LangGraph graph, tools (`search_life_info`, `list_topics`, `clarify`), persona |
 | [src/guardrails/](src/guardrails/) | Input guard, output guard (groundedness + PII), policy allow/denylists |
@@ -88,6 +95,11 @@ behind a config flag if I ever want it to sound like me.
   full answer, so the streaming voice path runs the fast local PII gate per
   sentence, while the full judge stack runs on `POST /ask` and in evals. Chosen
   deliberately: latency for conversation, strictness where it's measured.
+- **Synthetic ASR data over recording myself.** The people talking to the demo
+  are interviewers, not me — so a your-voice-only fine-tune adapts to the wrong
+  speakers. Multi-voice synthetic audio teaches the *vocabulary* in a way that
+  transfers to anyone, transcripts are perfect by construction, and the
+  held-out-voices eval proves it isn't memorizing TTS quirks.
 - **LoRA + CTranslate2 instead of full fine-tune.** Adapter training fits a
   consumer GPU; merging + int8 CT2 export means inference is identical in cost
   to stock faster-whisper.
@@ -117,17 +129,18 @@ make eval        # all suites, prints comparison vs last run
 make redteam     # just the adversarial suite
 ```
 
-TTS works out of the box (`pip install -e ".[tts]"` — Kokoro runs on CPU). Only
-the ASR fine-tune needs my recordings and a GPU: `make prepare-asr` →
-hand-correct the transcript TSV → `make train-asr` → `make export-asr`. Until
-then the server falls back to stock whisper-small automatically.
+TTS works out of the box (`pip install -e ".[tts]"` — Kokoro runs on CPU). The
+ASR fine-tune needs no recordings, just a GPU for the training step:
+`make synth-asr` (generate + render the synthetic dataset, CPU-fine) →
+`make prepare-asr` → `make train-asr` → `make export-asr`. Until then the
+server falls back to stock whisper-small with hotword biasing automatically.
 
 ## Status
 
 | Phase | State |
 |---|---|
 | 0 — Scaffolding, LLM wrapper, tooling | ✅ done |
-| 1 — ASR fine-tune pipeline | ✅ code complete — awaiting my recordings + GPU run |
+| 1 — ASR fine-tune pipeline | ✅ code complete — synthetic data gen runs on CPU; training awaits a GPU run. Hotword biasing active today |
 | 2 — RAG over life corpus | ✅ done — corpus stubs need my real content |
 | 3 — LangGraph agent | ✅ done |
 | 4 — Guardrails | ✅ done — red-team suite committed |

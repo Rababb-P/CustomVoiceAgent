@@ -6,8 +6,9 @@ help:
 	@echo "  setup        install core + dev deps (uv sync or pip)"
 	@echo "  lint         ruff check + format check"
 	@echo "  test         pytest"
-	@echo "  prepare-asr  chunk/resample recordings, bootstrap transcripts"
-	@echo "  train-asr    LoRA fine-tune Whisper on personal recordings"
+	@echo "  synth-asr    generate sentences + render multi-voice training audio"
+	@echo "  prepare-asr  assemble HF dataset (synthetic + TechVoice + Common Voice)"
+	@echo "  train-asr    LoRA fine-tune Whisper on the assembled dataset"
 	@echo "  export-asr   merge LoRA + convert to CTranslate2"
 	@echo "  eval-asr     WER base vs fine-tuned + custom-vocab report"
 	@echo "  ingest       build the Chroma index from data/corpus"
@@ -29,8 +30,12 @@ test:
 	$(PY) -m pytest -q
 
 # ---- Phase 1: ASR ----
+synth-asr:
+	$(PY) -m src.asr.gen_sentences --config configs/asr_finetune.yaml
+	$(PY) -m src.asr.synthesize --config configs/asr_finetune.yaml
+
 prepare-asr:
-	$(PY) -m src.asr.prepare_data --config configs/asr_finetune.yaml
+	$(PY) -m src.asr.prepare_data --synthetic --config configs/asr_finetune.yaml
 
 train-asr:
 	$(PY) -m src.asr.train --config configs/asr_finetune.yaml
@@ -68,5 +73,5 @@ bench-tts:
 serve:
 	$(PY) -m uvicorn src.server.app:app --host 0.0.0.0 --port 8000
 
-.PHONY: help setup lint test prepare-asr train-asr export-asr eval-asr ingest \
+.PHONY: help setup lint test synth-asr prepare-asr train-asr export-asr eval-asr ingest \
         eval-rag eval-agent redteam eval eval-ci bench-tts serve

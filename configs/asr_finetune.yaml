@@ -1,18 +1,46 @@
-# Phase 1: Whisper LoRA fine-tune on personal recordings.
+# Phase 1: Whisper LoRA fine-tune on synthetic multi-voice data.
+# Primary path: LLM-written sentences with my custom vocab -> many Kokoro voices ->
+# augmentation. TechVoice (real speaker) mixes in and provides the held-out eval.
+# The record-your-own-voice path still exists (raw_dir/transcripts_tsv below).
 data:
   raw_dir: data/audio/raw
   processed_dir: data/audio/processed
   transcripts_tsv: data/audio/processed/transcripts.tsv   # bootstrap then hand-correct
   max_segment_seconds: 30
   sample_rate: 16000
-  # Mix in Common Voice EN so the model keeps general English (5-10x personal volume).
+
+  synthetic:
+    out_dir: data/audio/synth
+    n_llm_sentences: 300          # generated via the cached Gemini wrapper, batched
+    sentences_per_call: 20        # keeps request count ~ n/20
+    tech_sentences:
+      enabled: true
+      dataset: danielrosehill/Tech-Sentences-For-ASR-Training
+      cap: 300
+    # Kokoro voices. Held-out voices are NEVER used for training renders — the
+    # validation set is held-out sentences spoken by held-out voices, so val WER
+    # measures cross-voice generalization, not memorization.
+    train_voices: [af_heart, af_bella, af_nicole, am_michael, am_fenrir, am_puck,
+                   bf_emma, bm_george, am_eric, af_sarah]
+    heldout_voices: [af_sky, am_adam, bf_isabella, bm_lewis]
+    heldout_sentence_fraction: 0.1
+    speeds: [0.9, 1.0, 1.1]       # speed perturbation (train renders only)
+    noise_fraction: 0.3           # fraction of train renders given additive noise
+    noise_snr_db: [15, 30]        # SNR range for that noise
+
+  techvoice:
+    enabled: true
+    dataset: danielrosehill/TechVoice   # MIT — real human tech speech, ~39 min
+    train_fraction: 0.7                 # rest becomes real-speaker eval data
+
+  # Mix in Common Voice EN so the model keeps general English.
   common_voice:
     enabled: true
     dataset: mozilla-foundation/common_voice_17_0
     language: en
-    multiplier: 5
+    multiplier: 2
   val_fraction: 0.1
-  # Rare technical terms stratified across train/val so the WER report covers them.
+  # Rare technical terms the sentences must cover; per-term WER reported in evals.
   custom_vocab: [WATonomous, Reparo, YOLOv11, ROS2, Slurm, Thevenin, Waterloo, LangGraph]
 
 model:
