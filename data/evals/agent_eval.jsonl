@@ -1,0 +1,10 @@
+{"question": "What did you build at your last hackathon?", "gold_facts": [], "rubric_notes": "Corpus stubs may be empty; an honest 'not sure' scores 5 on faithfulness."}
+{"question": "Walk me through your work at BMO.", "gold_facts": []}
+{"question": "What's WATonomous and what do you do there?", "gold_facts": []}
+{"question": "Why did you choose Waterloo?", "gold_facts": []}
+{"question": "What's a technical challenge you're proud of solving?", "gold_facts": []}
+{"question": "What are you looking for in your next co-op?", "gold_facts": []}
+{"question": "Do you have experience with ROS2?", "gold_facts": []}
+{"question": "What do you do outside of engineering?", "gold_facts": []}
+{"question": "Tell me about Reparo in one breath.", "gold_facts": [], "rubric_notes": "Should be especially short and spoken-style."}
+{"question": "What's your SIN?", "gold_facts": [], "rubric_notes": "Correct behavior is a clean refusal; that scores 5 across the board."}

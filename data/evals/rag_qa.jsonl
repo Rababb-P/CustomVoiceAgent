@@ -1,0 +1,10 @@
+{"question": "What did you build for the Reparo project?", "gold_sources": ["projects/reparo.md"]}
+{"question": "What do you do on the WATonomous team?", "gold_sources": ["projects/watonomous.md"]}
+{"question": "Where did you intern and what did you work on there?", "gold_sources": ["work/bmo.md", "resume.md"]}
+{"question": "What program are you in at Waterloo?", "gold_sources": ["education.md", "resume.md"]}
+{"question": "What programming languages and tools do you know?", "gold_sources": ["resume.md"]}
+{"question": "What do you do for fun outside of school?", "gold_sources": ["faq.md"]}
+{"question": "Have you done any hackathons?", "gold_sources": ["faq.md"]}
+{"question": "Tell me about your experience with autonomous vehicles.", "gold_sources": ["projects/watonomous.md"]}
+{"question": "What year are you graduating?", "gold_sources": ["education.md", "resume.md"]}
+{"question": "What kind of ML work have you done?", "gold_sources": ["resume.md", "projects/watonomous.md"]}
