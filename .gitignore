@@ -1,9 +1,11 @@
 # Secrets
 .env
 
-# Personal data: audio, corpus, vector index. Keep README + synthetic eval fixtures.
+# Personal data: audio + vector index stay local. Corpus, README, and synthetic
+# eval fixtures are committed — keep anything private out of data/corpus.
 data/*
 !data/README.md
+!data/corpus/
 !data/evals/
 data/evals/*
 !data/evals/rag_qa.jsonl
