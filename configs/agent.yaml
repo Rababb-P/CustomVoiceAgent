@@ -1,0 +1,36 @@
+# Phases 3-6: agent, guards, TTS, server.
+llm:
+  agent_model: gemini-2.5-flash
+  guard_model: gemini-2.5-flash-lite     # guards + judges: higher RPM/RPD tier
+  judge_model: gemini-2.5-flash-lite
+  temperature: 0.6
+  # Client-side limits kept under the free tier (~10 RPM flash / 15 RPM flash-lite).
+  rpm:
+    gemini-2.5-flash: 8
+    gemini-2.5-flash-lite: 12
+  max_retries: 4
+  cache_dir: .cache/llm
+
+agent:
+  max_tool_iterations: 5
+  memory_turns: 10          # checkpointed history cap per thread
+
+guards:
+  input:
+    max_chars: 2000
+    classifier_when_uncertain: true
+  output:
+    groundedness_check: true
+    max_regenerations: 1
+
+tts:
+  engine: chatterbox        # chatterbox | kokoro
+  reference_clip: data/audio/reference/voice_ref.wav   # 10-20s clean clip for cloning
+  kokoro_voice: am_adam
+  sample_rate: 24000
+
+server:
+  vad_silence_ms: 300       # end-of-speech threshold
+  barge_in: false           # stretch: cancel TTS when user speaks mid-answer
+  asr_model_dir: models/whisper-personal-ct2
+  asr_fallback: small       # base faster-whisper model if fine-tuned export missing

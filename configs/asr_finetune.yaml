@@ -1,0 +1,47 @@
+# Phase 1: Whisper LoRA fine-tune on personal recordings.
+data:
+  raw_dir: data/audio/raw
+  processed_dir: data/audio/processed
+  transcripts_tsv: data/audio/processed/transcripts.tsv   # bootstrap then hand-correct
+  max_segment_seconds: 30
+  sample_rate: 16000
+  # Mix in Common Voice EN so the model keeps general English (5-10x personal volume).
+  common_voice:
+    enabled: true
+    dataset: mozilla-foundation/common_voice_17_0
+    language: en
+    multiplier: 5
+  val_fraction: 0.1
+  # Rare technical terms stratified across train/val so the WER report covers them.
+  custom_vocab: [WATonomous, Reparo, YOLOv11, ROS2, Slurm, Thevenin, Waterloo, LangGraph]
+
+model:
+  base: openai/whisper-small        # swap to openai/whisper-medium with more VRAM
+  language: en
+  task: transcribe
+
+lora:
+  r: 32
+  alpha: 64
+  dropout: 0.05
+  target_modules: [q_proj, v_proj]
+
+training:
+  output_dir: runs/asr
+  per_device_train_batch_size: 8
+  gradient_accumulation_steps: 2
+  learning_rate: 1.0e-3
+  warmup_steps: 50
+  num_train_epochs: 3
+  fp16: true
+  eval_strategy: epoch
+  predict_with_generate: true
+  generation_max_length: 225
+  logging_steps: 25
+  save_total_limit: 2
+  seed: 42
+
+export:
+  merged_dir: models/whisper-personal-merged
+  ct2_dir: models/whisper-personal-ct2
+  quantization: int8_float16

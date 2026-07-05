@@ -1,0 +1,27 @@
+# Secrets
+.env
+
+# Personal data: audio, corpus, vector index. Keep README + synthetic eval fixtures.
+data/*
+!data/README.md
+!data/evals/
+data/evals/*
+!data/evals/rag_qa.jsonl
+!data/evals/adversarial.jsonl
+!data/evals/agent_eval.jsonl
+!data/evals/asr_eval.jsonl
+
+# Eval results & caches
+evals/results/
+.cache/
+runs/
+models/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+dist/

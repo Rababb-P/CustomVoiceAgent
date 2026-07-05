@@ -1,0 +1,71 @@
+[project]
+name = "voice-agent-v2"
+version = "0.1.0"
+description = "Voice persona agent: fine-tuned Whisper ASR + RAG + LangGraph agent + guardrails + local voice-cloned TTS"
+requires-python = ">=3.11"
+dependencies = [
+    "python-dotenv>=1.0",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "langchain>=0.3",
+    "langchain-core>=0.3",
+    "langchain-community>=0.3",
+    "langchain-google-genai>=2.0",
+    "langchain-huggingface>=0.1",
+    "langchain-chroma>=0.1",
+    "langgraph>=0.2",
+    "chromadb>=0.5",
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.30",
+    "websockets>=12.0",
+]
+
+[project.optional-dependencies]
+# Phase 1: ASR fine-tuning (needs GPU for training)
+asr = [
+    "torch>=2.2",
+    "transformers>=4.44",
+    "datasets>=2.20",
+    "peft>=0.11",
+    "accelerate>=0.30",
+    "jiwer>=3.0",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "faster-whisper>=1.0",
+    "ctranslate2>=4.0",
+    "tensorboard>=2.16",
+]
+# Phase 6: local TTS + VAD
+tts = [
+    "chatterbox-tts>=0.1",
+    "kokoro>=0.7",
+    "silero-vad>=5.0",
+    "sounddevice>=0.4",
+]
+# Embeddings run locally; sentence-transformers pulls torch
+rag = [
+    "sentence-transformers>=3.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
