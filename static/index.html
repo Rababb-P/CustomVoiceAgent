@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Rababb — voice test page</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 3rem auto; padding: 0 1rem; background: #111; color: #eee; }
+  button { font-size: 1.1rem; padding: .7rem 1.6rem; border-radius: 8px; border: 0; cursor: pointer; background: #2f6fed; color: white; }
+  button.recording { background: #d33; }
+  #log { margin-top: 1.5rem; }
+  .msg { padding: .5rem .8rem; border-radius: 8px; margin: .4rem 0; white-space: pre-wrap; }
+  .user { background: #223; }
+  .agent { background: #1e2f1e; }
+  .meta { color: #888; font-size: .8rem; }
+</style>
+</head>
+<body>
+<h2>AI Rababb</h2>
+<p>Hold the button (or press space) to talk. Audio streams over a WebSocket; replies come back in the cloned voice.</p>
+<button id="talk">Hold to talk</button>
+<div id="log"></div>
+<script>
+const logEl = document.getElementById('log');
+const btn = document.getElementById('talk');
+let ws, mediaStream, audioCtx, workletNode, ttsRate = 24000;
+let playQueue = Promise.resolve();
+
+function log(cls, text) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + cls;
+  div.textContent = text;
+  logEl.prepend(div);
+}
+
+async function connect() {
+  ws = new WebSocket(`ws://${location.host}/converse`);
+  ws.binaryType = 'arraybuffer';
+  ws.onmessage = (ev) => {
+    if (typeof ev.data === 'string') {
+      const e = JSON.parse(ev.data);
+      if (e.type === 'config') ttsRate = e.tts_sample_rate;
+      if (e.type === 'transcript') log('user', 'You: ' + e.text);
+      if (e.type === 'answer_chunk') log('agent', e.text);
+      if (e.type === 'turn_end' && e.timings) log('meta', 'timings ' + JSON.stringify(e.timings));
+      if (e.type === 'error') log('meta', 'error: ' + e.detail);
+    } else {
+      playPcm(ev.data);
+    }
+  };
+  await new Promise(r => ws.onopen = r);
+}
+
+function playPcm(buf) {
+  playQueue = playQueue.then(() => new Promise(resolve => {
+    const pcm = new Int16Array(buf);
+    const f32 = Float32Array.from(pcm, s => s / 32768);
+    const ctx = audioCtx || (audioCtx = new AudioContext());
+    const audioBuf = ctx.createBuffer(1, f32.length, ttsRate);
+    audioBuf.copyToChannel(f32, 0);
+    const src = ctx.createBufferSource();
+    src.buffer = audioBuf;
+    src.connect(ctx.destination);
+    src.onended = resolve;
+    src.start();
+  }));
+}
+
+async function startMic() {
+  mediaStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, sampleRate: 16000 } });
+  const ctx = new AudioContext({ sampleRate: 16000 });
+  await ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([`
+    registerProcessor('pcm', class extends AudioWorkletProcessor {
+      process(inputs) {
+        const ch = inputs[0][0];
+        if (ch) {
+          const pcm = new Int16Array(ch.length);
+          for (let i = 0; i < ch.length; i++) pcm[i] = Math.max(-1, Math.min(1, ch[i])) * 32767;
+          this.port.postMessage(pcm.buffer, [pcm.buffer]);
+        }
+        return true;
+      }
+    });`], { type: 'application/javascript' })));
+  const src = ctx.createMediaStreamSource(mediaStream);
+  workletNode = new AudioWorkletNode(ctx, 'pcm');
+  workletNode.port.onmessage = (e) => { if (ws?.readyState === 1 && recording) ws.send(e.data); };
+  src.connect(workletNode);
+}
+
+let recording = false;
+async function down() {
+  if (!ws) { await connect(); await startMic(); }
+  recording = true;
+  btn.classList.add('recording');
+  btn.textContent = 'Listening…';
+}
+function up() {
+  if (!recording) return;
+  recording = false;
+  btn.classList.remove('recording');
+  btn.textContent = 'Hold to talk';
+  ws.send(JSON.stringify({ type: 'end_turn' }));
+}
+btn.addEventListener('mousedown', down);
+btn.addEventListener('mouseup', up);
+btn.addEventListener('mouseleave', up);
+btn.addEventListener('touchstart', e => { e.preventDefault(); down(); });
+btn.addEventListener('touchend', e => { e.preventDefault(); up(); });
+document.addEventListener('keydown', e => { if (e.code === 'Space' && !e.repeat) { e.preventDefault(); down(); } });
+document.addEventListener('keyup', e => { if (e.code === 'Space') { e.preventDefault(); up(); } });
+</script>
+</body>
+</html>
