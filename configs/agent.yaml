@@ -24,9 +24,9 @@ guards:
     max_regenerations: 1
 
 tts:
-  engine: chatterbox        # chatterbox | kokoro
-  reference_clip: data/audio/reference/voice_ref.wav   # 10-20s clean clip for cloning
+  engine: kokoro            # kokoro (default, any-AI-voice) | chatterbox (optional voice clone)
   kokoro_voice: am_adam
+  reference_clip: data/audio/reference/voice_ref.wav   # only used if engine: chatterbox
   sample_rate: 24000
 
 server:

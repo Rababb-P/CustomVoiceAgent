@@ -1,12 +1,12 @@
 # Voice Persona Agent v2 — "AI Rababb"
 
-A voice-to-voice AI that answers questions about me, as me — in my cloned voice,
-grounded in my actual resume and project history, and unable to make things up.
+A voice-to-voice AI that answers questions about me, as me — grounded in my
+actual resume and project history, and unable to make things up.
 
 Speak into a mic; a Whisper model **fine-tuned on my own speech** transcribes it,
 a **LangGraph agent** retrieves facts from a personal corpus via RAG, layered
-**guardrails** block prompt injection and hallucinated claims, and a **locally
-voice-cloned TTS** speaks the answer back. Total API cost: **$0** — everything
+**guardrails** block prompt injection and hallucinated claims, and a **fully
+local TTS engine** speaks the answer back. Total API cost: **$0** — everything
 runs locally except the LLM, which rides the Gemini free tier behind a
 rate-limited, disk-cached client I wrote to make that survivable.
 
@@ -14,9 +14,9 @@ rate-limited, disk-cached client I wrote to make that survivable.
  mic audio ──► VAD ──► fine-tuned Whisper ──► input guard ──► LangGraph agent ◄──► RAG tools
  (browser)  (silero)   (LoRA + CTranslate2)   (heuristics +        │                (Chroma +
                                                flash-lite)         ▼                 bge-small)
- speaker ◄── voice-cloned TTS ◄── sentence chunker ◄── output guard (PII regex +
-            (Chatterbox, local)   (streams while LLM     groundedness judge)
-                                   still generating)
+ speaker ◄──── local TTS ◄────── sentence chunker ◄── output guard (PII regex +
+             (Kokoro, on-CPU;    (streams while LLM     groundedness judge)
+              cloning optional)   still generating)
 ```
 
 ## Why this project is interesting (the 60-second tour)
@@ -56,8 +56,9 @@ which has higher limits; only the agent itself uses `flash`.
 ([src/tts/chunker.py](src/tts/chunker.py)) and each sentence is synthesized
 while the LLM is still generating, so first audio plays early. Per-stage
 timings (VAD, ASR, agent, first-audio) are logged every turn, and
-`make bench-tts` benchmarks Chatterbox (voice-cloned) vs Kokoro (fast fallback)
-on the current machine.
+`make bench-tts` benchmarks the TTS engines on the current machine. Kokoro is
+the default — fast and CPU-friendly; Chatterbox voice cloning stays available
+behind a config flag if I ever want it to sound like me.
 
 ## Repo tour
 
@@ -68,7 +69,7 @@ on the current machine.
 | [src/rag/](src/rag/) | Markdown corpus → header-aware chunks → bge-small embeddings → Chroma |
 | [src/agent/](src/agent/) | LangGraph graph, tools (`search_life_info`, `list_topics`, `clarify`), persona |
 | [src/guardrails/](src/guardrails/) | Input guard, output guard (groundedness + PII), policy allow/denylists |
-| [src/tts/](src/tts/) | Chatterbox voice clone + Kokoro fallback behind one async interface |
+| [src/tts/](src/tts/) | Kokoro TTS (default) + optional Chatterbox clone behind one async interface |
 | [src/server/](src/server/) | FastAPI WebSocket `/converse` (audio↔audio) + `POST /ask`, silero VAD |
 | [evals/](evals/) | Four eval suites + [report.py](evals/report.py) aggregator with the regression gate |
 | [tests/](tests/) | 42 unit tests — graph runs on a fake chat model: no API key, no quota |
@@ -116,10 +117,10 @@ make eval        # all suites, prints comparison vs last run
 make redteam     # just the adversarial suite
 ```
 
-The ASR and TTS phases need my recordings and a GPU:
-`make prepare-asr` → hand-correct the transcript TSV → `make train-asr` →
-`make export-asr`. TTS voice cloning just needs a clean 10–20s reference clip in
-`data/audio/reference/voice_ref.wav`.
+TTS works out of the box (`pip install -e ".[tts]"` — Kokoro runs on CPU). Only
+the ASR fine-tune needs my recordings and a GPU: `make prepare-asr` →
+hand-correct the transcript TSV → `make train-asr` → `make export-asr`. Until
+then the server falls back to stock whisper-small automatically.
 
 ## Status
 
@@ -131,7 +132,7 @@ The ASR and TTS phases need my recordings and a GPU:
 | 3 — LangGraph agent | ✅ done |
 | 4 — Guardrails | ✅ done — red-team suite committed |
 | 5 — Eval harness + regression gate | ✅ done |
-| 6 — Voice loop (TTS, VAD, WebSocket server) | ✅ done — barge-in is a flagged stretch goal |
+| 6 — Voice loop (TTS, VAD, WebSocket server) | ✅ done — Kokoro voice by default; cloning and barge-in are flagged extras |
 
 Privacy note: recordings, the personal corpus, and the vector index are
 gitignored and never leave my machine. The only cloud dependency is the Gemini

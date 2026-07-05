@@ -7,7 +7,7 @@ audio recordings and the personal corpus never leave this machine.
 data/
 ├── audio/raw/          # your voice recordings (wav/mp3/m4a), 60–120 min total
 ├── audio/processed/    # segments, corrected transcripts.tsv, HF dataset
-├── audio/reference/    # voice_ref.wav — the 10–20s clip Chatterbox clones
+├── audio/reference/    # voice_ref.wav — only needed if using optional Chatterbox cloning
 ├── corpus/             # markdown persona corpus (stubs committed locally only)
 ├── evals/              # JSONL eval sets (fixtures below ARE committed)
 └── .chroma/            # persisted vector index (make ingest)

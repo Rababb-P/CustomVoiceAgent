@@ -1,7 +1,9 @@
 """Local TTS behind a common async interface.
 
-Primary: Chatterbox (Resemble AI, MIT) — zero-shot voice cloning from a 10-20s
-reference clip. Fallback: Kokoro — much faster, tiny, but generic voice.
+Primary: Kokoro — fast, tiny, good quality, CPU-friendly; the voice is a stock
+AI voice, which is all this project needs. Optional: Chatterbox (Resemble AI,
+MIT) for zero-shot voice cloning from a 10-20s reference clip, behind the
+config flag `tts.engine: chatterbox`.
 Both are warm-loaded once (at server start) and expose cancel() so barge-in can
 cut a turn short. `python -m src.tts.speak --bench` compares synthesis speed.
 """

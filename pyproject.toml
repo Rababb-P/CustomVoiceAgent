@@ -1,7 +1,7 @@
 [project]
 name = "voice-agent-v2"
 version = "0.1.0"
-description = "Voice persona agent: fine-tuned Whisper ASR + RAG + LangGraph agent + guardrails + local voice-cloned TTS"
+description = "Voice persona agent: fine-tuned Whisper ASR + RAG + LangGraph agent + guardrails + local TTS"
 requires-python = ">=3.11"
 dependencies = [
     "python-dotenv>=1.0",
@@ -35,12 +35,15 @@ asr = [
     "ctranslate2>=4.0",
     "tensorboard>=2.16",
 ]
-# Phase 6: local TTS + VAD
+# Phase 6: local TTS + VAD (Kokoro default — fast, CPU-friendly, stock AI voice)
 tts = [
-    "chatterbox-tts>=0.1",
     "kokoro>=0.7",
     "silero-vad>=5.0",
     "sounddevice>=0.4",
+]
+# Optional: Chatterbox voice cloning (tts.engine: chatterbox in configs/agent.yaml)
+clone = [
+    "chatterbox-tts>=0.1",
 ]
 # Embeddings run locally; sentence-transformers pulls torch
 rag = [
