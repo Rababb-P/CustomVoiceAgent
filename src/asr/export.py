@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from pathlib import Path
 
 from src.config import load_config
@@ -29,9 +30,10 @@ def main() -> None:
     WhisperProcessor.from_pretrained(str(adapter_dir)).save_pretrained(str(merged_dir))
     print(f"Merged model -> {merged_dir}")
 
+    # Module form of ct2-transformers-converter: findable without venv activation.
     subprocess.run(
         [
-            "ct2-transformers-converter",
+            sys.executable, "-m", "ctranslate2.converters.transformers",
             "--model", str(merged_dir),
             "--output_dir", str(ct2_dir),
             "--quantization", cfg["export"]["quantization"],

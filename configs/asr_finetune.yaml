@@ -29,14 +29,19 @@ data:
     noise_snr_db: [15, 30]        # SNR range for that noise
 
   techvoice:
-    enabled: true
+    # 2026-07-05: repo went 401 (private/removed) on HF mid-run; disabled until
+    # it returns or a real-speech substitute is picked. Costs the real-speaker
+    # eval rows — asr_eval.jsonl will hold synth_heldout rows only.
+    enabled: false
     dataset: danielrosehill/TechVoice   # MIT — real human tech speech, ~39 min
     train_fraction: 0.7                 # rest becomes real-speaker eval data
 
   # Mix in Common Voice EN so the model keeps general English.
   common_voice:
     enabled: true
-    dataset: mozilla-foundation/common_voice_17_0
+    # mozilla-foundation/* repos on HF were emptied (data moved to Mozilla's
+    # platform); fixie-ai mirrors the same CV17 data with the same schema.
+    dataset: fixie-ai/common_voice_17_0
     language: en
     multiplier: 2
   val_fraction: 0.1
@@ -58,7 +63,9 @@ training:
   output_dir: runs/asr
   per_device_train_batch_size: 8
   gradient_accumulation_steps: 2
-  learning_rate: 1.0e-3
+  # 1e-3 destabilized mid-run (epoch WER 2.8% -> 28.6% with repetition loops);
+  # 2e-4 trains the same LoRA smoothly.
+  learning_rate: 2.0e-4
   warmup_steps: 50
   num_train_epochs: 3
   fp16: true

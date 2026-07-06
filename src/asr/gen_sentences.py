@@ -104,21 +104,30 @@ def load_tech_sentences(cfg: dict) -> list[dict]:
     rows: dict[str, dict] = {}
     text_col = next(c for c in ("text", "sentence", "sentences") if c in ds.column_names)
     for ex in ds:
-        text = str(ex[text_col]).strip()
-        if validate(text, vocab, require_term=False) is None:
-            continue
-        rows.setdefault(
-            _sentence_id(text),
-            {
-                "id": _sentence_id(text),
-                "text": text,
-                "source": "tech_sentences",
-                "terms": find_terms(text, vocab),
-            },
-        )
+        # Rows are multi-sentence paragraphs; split so clips stay short enough
+        # for TTS and the word-count bounds in validate().
+        for text in re.split(r"(?<=[.!?])\s+", str(ex[text_col]).strip()):
+            _collect_tech_sentence(text, vocab, rows)
+            if len(rows) >= syn.get("cap", 300):
+                break
         if len(rows) >= syn.get("cap", 300):
             break
     return list(rows.values())
+
+
+def _collect_tech_sentence(text: str, vocab: list[str], rows: dict[str, dict]) -> None:
+    text = text.strip()
+    if validate(text, vocab, require_term=False) is None:
+        return
+    rows.setdefault(
+        _sentence_id(text),
+        {
+            "id": _sentence_id(text),
+            "text": text,
+            "source": "tech_sentences",
+            "terms": find_terms(text, vocab),
+        },
+    )
 
 
 def main() -> None:

@@ -22,6 +22,39 @@ from src.config import ROOT, load_config
 
 # --------------------------------------------------------------- shared helpers
 
+# Audio is decoded with soundfile (wav + mp3) instead of datasets' Audio
+# feature: datasets >=4 delegates decoding to torchcodec, which needs FFmpeg
+# shared libraries — a system dependency this repo avoids. Columns are plain
+# {array, sampling_rate} structs, which is exactly what train.py consumes.
+
+
+def _audio_features():
+    from datasets import Features, Sequence, Value
+
+    return Features(
+        {
+            "audio": {"array": Sequence(Value("float32")), "sampling_rate": Value("int64")},
+            "transcript": Value("string"),
+        }
+    )
+
+
+def _read_audio(source, target_sr: int):
+    """Decode a wav/mp3 file path or bytes to mono float32 at target_sr."""
+    import io
+
+    import librosa
+    import numpy as np
+    import soundfile as sf
+
+    wav, sr = sf.read(io.BytesIO(source) if isinstance(source, bytes) else source,
+                      dtype="float32")
+    if wav.ndim > 1:
+        wav = wav.mean(axis=1)
+    if sr != target_sr:
+        wav = librosa.resample(wav, orig_sr=sr, target_sr=target_sr)
+    return np.asarray(wav, dtype="float32")
+
 
 def _load_common_voice(cfg: dict, n: int):
     """Streamed slice of Common Voice as a Dataset, or None if disabled."""
@@ -30,14 +63,18 @@ def _load_common_voice(cfg: dict, n: int):
         return None
     from datasets import Audio, Dataset, load_dataset
 
+    sr = cfg["data"]["sample_rate"]
     cv = load_dataset(cv_cfg["dataset"], cv_cfg["language"], split="train", streaming=True)
-    rows = {"audio": [], "transcript": []}
-    for ex in cv.take(n):
-        rows["audio"].append(ex["audio"])
-        rows["transcript"].append(ex["sentence"])
-    ds = Dataset.from_dict(rows).cast_column(
-        "audio", Audio(sampling_rate=cfg["data"]["sample_rate"])
-    )
+    cv = cv.cast_column("audio", Audio(decode=False))  # raw bytes; we decode ourselves
+
+    def gen():
+        for ex in cv.take(n):
+            yield {
+                "audio": {"array": _read_audio(ex["audio"]["bytes"], sr), "sampling_rate": sr},
+                "transcript": ex["sentence"],
+            }
+
+    ds = Dataset.from_generator(gen, features=_audio_features())
     print(f"Mixed in {len(ds)} Common Voice examples.")
     return ds
 
@@ -54,21 +91,40 @@ def _save_dataset(train, val, cfg: dict) -> None:
 
 
 def _load_techvoice(cfg: dict):
-    """Returns (train Dataset | None, eval rows for asr_eval.jsonl)."""
+    """Returns (train Dataset | None, eval rows for asr_eval.jsonl).
+
+    TechVoice metadata rows carry an audio_filepath relative to the dataset
+    repo (no embedded audio column), so the wav files are fetched with
+    snapshot_download and decoded locally.
+    """
     tv_cfg = cfg["data"].get("techvoice", {})
     if not tv_cfg.get("enabled"):
         return None, []
     import soundfile as sf
-    from datasets import Audio, load_dataset
+    from datasets import Dataset, load_dataset
+    from huggingface_hub import snapshot_download
 
+    sr = cfg["data"]["sample_rate"]
     ds = load_dataset(tv_cfg["dataset"], split="train")
     text_col = next(c for c in ("text", "sentence", "transcript") if c in ds.column_names)
-    ds = ds.cast_column("audio", Audio(sampling_rate=cfg["data"]["sample_rate"]))
+    repo_dir = Path(
+        snapshot_download(tv_cfg["dataset"], repo_type="dataset", allow_patterns=["audio/*"])
+    )
     ds = ds.shuffle(seed=42)
 
     n_train = int(len(ds) * tv_cfg.get("train_fraction", 0.7))
-    train = ds.select(range(n_train)).rename_column(text_col, "transcript")
-    train = train.select_columns(["audio", "transcript"])
+
+    def gen():
+        for ex in ds.select(range(n_train)):
+            yield {
+                "audio": {
+                    "array": _read_audio(str(repo_dir / ex["audio_filepath"]), sr),
+                    "sampling_rate": sr,
+                },
+                "transcript": ex[text_col],
+            }
+
+    train = Dataset.from_generator(gen, features=_audio_features())
 
     # Held-out portion -> local wavs + eval rows (real unseen-speaker test set).
     heldout_dir = ROOT / cfg["data"]["processed_dir"] / "heldout"
@@ -78,7 +134,7 @@ def _load_techvoice(cfg: dict):
         ex = ds[i]
         path = heldout_dir / f"techvoice_{i:04d}.wav"
         if not path.exists():
-            sf.write(path, ex["audio"]["array"], ex["audio"]["sampling_rate"])
+            sf.write(path, _read_audio(str(repo_dir / ex["audio_filepath"]), sr), sr)
         eval_rows.append(
             {
                 "audio_path": str(path.relative_to(ROOT)).replace("\\", "/"),
@@ -91,7 +147,7 @@ def _load_techvoice(cfg: dict):
 
 
 def build_synthetic(cfg: dict) -> None:
-    from datasets import Audio, Dataset, concatenate_datasets
+    from datasets import Dataset, concatenate_datasets
 
     syn_dir = ROOT / cfg["data"]["synthetic"]["out_dir"]
     manifest_path = syn_dir / "synth_manifest.jsonl"
@@ -100,14 +156,20 @@ def build_synthetic(cfg: dict) -> None:
     manifest = [
         json.loads(line) for line in manifest_path.read_text(encoding="utf-8").splitlines()
     ]
+    sr = cfg["data"]["sample_rate"]
 
     def to_dataset(rows: list[dict]) -> Dataset:
-        return Dataset.from_dict(
-            {
-                "audio": [str(ROOT / r["audio_path"]) for r in rows],
-                "transcript": [r["text"] for r in rows],
-            }
-        ).cast_column("audio", Audio(sampling_rate=cfg["data"]["sample_rate"]))
+        def gen():
+            for r in rows:
+                yield {
+                    "audio": {
+                        "array": _read_audio(str(ROOT / r["audio_path"]), sr),
+                        "sampling_rate": sr,
+                    },
+                    "transcript": r["text"],
+                }
+
+        return Dataset.from_generator(gen, features=_audio_features())
 
     synth_train = to_dataset([r for r in manifest if r["split"] == "train"])
     synth_val_rows = [r for r in manifest if r["split"] == "val"]

@@ -106,6 +106,12 @@ def main() -> None:
             num_train_epochs=t["num_train_epochs"],
             fp16=t["fp16"],
             eval_strategy=t["eval_strategy"],
+            # Ship the best epoch, not whichever state training happened to
+            # end on — mid-run instability otherwise overwrites a good adapter.
+            save_strategy=t["eval_strategy"],
+            load_best_model_at_end=True,
+            metric_for_best_model="wer",
+            greater_is_better=False,
             predict_with_generate=t["predict_with_generate"],
             generation_max_length=t["generation_max_length"],
             logging_steps=t["logging_steps"],
