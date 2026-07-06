@@ -37,10 +37,19 @@ class AgentState(TypedDict):
     regens: int            # regeneration attempts used this turn
 
 
+def _text(m: BaseMessage) -> str:
+    """Message text on any langchain-core: .content is a plain string in <1.0
+    and a list of content blocks (text, thought signatures, ...) in >=1.0."""
+    if isinstance(m.content, str):
+        return m.content
+    text = m.text
+    return text if isinstance(text, str) else str(text())
+
+
 def _last_human(messages: list[BaseMessage]) -> str:
     for m in reversed(messages):
         if isinstance(m, HumanMessage):
-            return str(m.content)
+            return _text(m)
     return ""
 
 
@@ -125,11 +134,11 @@ def build_graph(
 
     def clarify_node(state: AgentState) -> dict:
         # The clarify tool is terminal: speak the question back to the user.
-        question = str(state["messages"][-1].content).removeprefix("CLARIFY:").strip()
+        question = _text(state["messages"][-1]).removeprefix("CLARIFY:").strip()
         return {"messages": [AIMessage(content=question)]}
 
     def output_guard_node(state: AgentState) -> dict:
-        answer = str(state["messages"][-1].content)
+        answer = _text(state["messages"][-1])
         chunks = _turn_tool_chunks(state["messages"])
         decision = check_output(
             answer,
@@ -158,7 +167,7 @@ def build_graph(
 
     def route_after_tools(state: AgentState) -> str:
         last = state["messages"][-1]
-        if isinstance(last.content, str) and last.content.startswith("CLARIFY:"):
+        if _text(last).startswith("CLARIFY:"):
             return "clarify"
         return "agent"
 
@@ -210,7 +219,7 @@ def ask(
         logger.warning("recursion limit hit; returning safe fallback")
         return {"answer": SAFE_FALLBACK, "guard": {"verdict": "allow"}, "chunks": []}
     return {
-        "answer": str(state["messages"][-1].content),
+        "answer": _text(state["messages"][-1]),
         "guard": state.get("guard", {}),
         "chunks": state.get("chunks", []),
     }
@@ -238,7 +247,7 @@ def main() -> None:
                         kind = type(m).__name__
                         calls = getattr(m, "tool_calls", None)
                         detail = f" tool_calls={[c['name'] for c in calls]}" if calls else ""
-                        print(f"[{node}] {kind}{detail}: {str(m.content)[:120]}")
+                        print(f"[{node}] {kind}{detail}: {_text(m)[:120]}")
         except GraphRecursionError:
             print(f"\n{SAFE_FALLBACK}")
             return
