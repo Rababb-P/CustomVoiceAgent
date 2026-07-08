@@ -154,26 +154,43 @@ async def converse(ws: WebSocket) -> None:
     vad = EndOfSpeechDetector(silence_ms=cfg["server"]["vad_silence_ms"])
     buffer = bytearray()
     thread_id = f"ws-{id(ws)}"
+    # The turn runs as a task so this loop keeps consuming the socket: uvicorn
+    # applies read backpressure when the app stops receiving, which also stops
+    # ping/pong processing — the keepalive then kills the connection (1011)
+    # mid-turn. Mic frames that arrive while a turn is running are discarded.
+    turn: asyncio.Task | None = None
+
+    def start_turn(audio: bytes) -> asyncio.Task:
+        return asyncio.create_task(_run_turn(ws, audio, thread_id))
+
     try:
         while True:
             message = await ws.receive()
+            if turn and turn.done():
+                turn.result()  # surface exceptions from the finished turn
+                turn = None
             if message.get("bytes"):
+                if turn:
+                    continue
                 buffer.extend(message["bytes"])
                 if vad.update(message["bytes"]):
                     audio, _ = bytes(buffer), buffer.clear()
                     vad.reset()
-                    await _run_turn(ws, audio, thread_id)
+                    turn = start_turn(audio)
             elif message.get("text"):
                 event = json.loads(message["text"])
                 if event.get("type") == "end_turn":  # client-side push-to-talk release
-                    if buffer:
+                    if buffer and not turn:
                         audio, _ = bytes(buffer), buffer.clear()
                         vad.reset()
-                        await _run_turn(ws, audio, thread_id)
+                        turn = start_turn(audio)
             elif message.get("type") == "websocket.disconnect":
                 break
     except WebSocketDisconnect:
         pass
+    finally:
+        if turn and not turn.done():
+            turn.cancel()
 
 
 @app.post("/ask")
