@@ -9,10 +9,13 @@ from __future__ import annotations
 
 import argparse
 import functools
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from src.config import load_config
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -28,9 +31,22 @@ def _load_model():
 
     cfg = load_config("agent")["server"]
     model_dir = Path(cfg["asr_model_dir"])
-    if model_dir.exists():
-        return WhisperModel(str(model_dir), compute_type="auto"), str(model_dir)
-    return WhisperModel(cfg["asr_fallback"], compute_type="auto"), cfg["asr_fallback"]
+    src = str(model_dir) if model_dir.exists() else cfg["asr_fallback"]
+
+    if cfg.get("asr_device", "auto") in ("auto", "cuda"):
+        try:
+            import numpy as np
+            import torch  # loads the CUDA/cuDNN DLLs ctranslate2 needs on Windows
+
+            if torch.cuda.is_available():
+                model = WhisperModel(src, device="cuda", compute_type="auto")
+                # Force kernel load now so failures fall back here, not per-turn.
+                segments, _ = model.transcribe(np.zeros(8000, dtype=np.float32), language="en")
+                list(segments)
+                return model, f"{src} [cuda]"
+        except Exception as e:
+            logger.warning("CUDA ASR unavailable (%s); using CPU", e)
+    return WhisperModel(src, compute_type="auto"), f"{src} [cpu]"
 
 
 @functools.lru_cache(maxsize=1)

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import copy
 import io
 import json
 import logging
@@ -30,7 +31,7 @@ from fastapi.responses import HTMLResponse
 
 from src.config import ROOT, load_config
 from src.guardrails.policy import find_pii
-from src.tts.chunker import chunk_stream
+from src.tts.chunker import achunk_stream, chunk_stream
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -47,7 +48,15 @@ async def lifespan(app: FastAPI):
     from src.agent.graph import build_graph
 
     state["graph"] = build_graph()
-    logger.info("agent graph compiled")
+    # Streaming graph for the voice path. The groundedness judge needs the
+    # full answer, so per the design it is skipped here (the local PII gate
+    # runs per sentence instead) — which also means tokens can be spoken as
+    # they stream and no regeneration can contradict already-spoken audio.
+    ws_cfg = copy.deepcopy(cfg)
+    ws_cfg["guards"]["output"]["groundedness_check"] = False
+    ws_cfg["guards"]["output"]["max_regenerations"] = 0
+    state["graph_ws"] = build_graph(judge=None, config=ws_cfg)
+    logger.info("agent graphs compiled (full + streaming)")
 
     from src.asr.transcribe import _load_model
 
@@ -80,14 +89,23 @@ def _pcm_to_wav_bytes(pcm: bytes, sample_rate: int) -> bytes:
     return buf.getvalue()
 
 
-async def _speak_sentences(ws: WebSocket, sentences: list[str], timings: dict) -> None:
-    """Synthesize each sentence and stream PCM16 frames; PII gate per sentence."""
+async def _drain(queue: asyncio.Queue) -> None:
+    """Consume a sentence queue to its None sentinel so the producer never
+    blocks on put() after the speaking side bails out early."""
+    while await queue.get() is not None:
+        pass
+
+
+async def _speak_sentences(ws: WebSocket, sentences: asyncio.Queue, timings: dict) -> None:
+    """Synthesize each queued sentence and stream PCM16 frames; PII gate per
+    sentence. Consumes until the None sentinel."""
     tts = state["tts"]
     first_audio_at = None
-    for sentence in sentences:
+    while (sentence := await sentences.get()) is not None:
         if find_pii(sentence):
             logger.error("PII detected in sentence, muting turn")
             await ws.send_text(json.dumps({"type": "error", "detail": "output blocked"}))
+            await _drain(sentences)
             return
         await ws.send_text(json.dumps({"type": "answer_chunk", "text": sentence}))
         if tts is None:
@@ -102,11 +120,15 @@ async def _speak_sentences(ws: WebSocket, sentences: list[str], timings: dict) -
             # TTS crash degrades gracefully: text already sent, tell the client.
             logger.exception("TTS failed mid-turn")
             await ws.send_text(json.dumps({"type": "error", "detail": f"tts: {e}"}))
+            await _drain(sentences)
             return
 
 
 async def _run_turn(ws: WebSocket, audio: bytes, thread_id: str) -> None:
-    from src.agent.graph import ask
+    from langchain_core.messages import HumanMessage
+    from langgraph.errors import GraphRecursionError
+
+    from src.agent.graph import SAFE_FALLBACK, _text, recursion_limit
     from src.asr.transcribe import transcribe
 
     timings: dict = {"_t0": time.perf_counter()}
@@ -120,11 +142,62 @@ async def _run_turn(ws: WebSocket, audio: bytes, thread_id: str) -> None:
         await ws.send_text(json.dumps({"type": "turn_end", "timings": {}}))
         return
 
-    turn = await asyncio.to_thread(ask, state["graph"], result.text, thread_id=thread_id)
-    timings["agent_s"] = round(time.perf_counter() - t0 - timings["asr_s"], 2)
+    meta: dict = {"guard": {}, "chunks": [], "fallback": ""}
+    parts: list[str] = []
 
-    sentences = list(chunk_stream([turn["answer"]]))
-    await _speak_sentences(ws, sentences, timings)
+    async def tokens():
+        """Final-answer tokens from the streaming graph; guard verdicts,
+        retrieved chunks, and non-streamed messages (refusals, clarify) are
+        collected into meta on the side."""
+        async for mode, payload in state["graph_ws"].astream(
+            {"messages": [HumanMessage(content=result.text)]},
+            config={"configurable": {"thread_id": thread_id},
+                    "recursion_limit": recursion_limit(state["cfg"])},
+            stream_mode=["messages", "updates"],
+        ):
+            if mode == "messages":
+                chunk, md = payload
+                if md.get("langgraph_node") != "agent" or getattr(chunk, "tool_calls", None) \
+                        or getattr(chunk, "tool_call_chunks", None):
+                    continue
+                text = _text(chunk)
+                if text:
+                    parts.append(text)
+                    yield text
+            else:
+                for node, update in payload.items():
+                    if not isinstance(update, dict):
+                        continue
+                    meta["guard"] = update.get("guard") or meta["guard"]
+                    meta["chunks"] = update.get("chunks") or meta["chunks"]
+                    guard_nodes = ("input_guard", "clarify", "output_guard")
+                    if node in guard_nodes and update.get("messages"):
+                        meta["fallback"] = _text(update["messages"][-1])
+
+    # The queue decouples token production from synthesis: the LLM keeps
+    # generating while a sentence is being spoken.
+    queue: asyncio.Queue = asyncio.Queue()
+
+    async def produce() -> None:
+        spoken = 0
+        try:
+            async for sentence in achunk_stream(tokens()):
+                await queue.put(sentence)
+                spoken += 1
+        except GraphRecursionError:
+            logger.warning("recursion limit hit; speaking safe fallback")
+            meta["fallback"] = SAFE_FALLBACK
+        finally:
+            timings["agent_s"] = round(time.perf_counter() - t0 - timings["asr_s"], 2)
+            if not spoken and meta["fallback"]:
+                # Guard refusal / clarify / fallback: nothing streamed, speak it.
+                for s in chunk_stream([meta["fallback"]]):
+                    await queue.put(s)
+            await queue.put(None)
+
+    producer = asyncio.create_task(produce())
+    await _speak_sentences(ws, queue, timings)
+    await producer  # surface graph errors after the queue is drained
 
     timings["total_s"] = round(time.perf_counter() - t0, 2)
     timings.pop("_t0", None)
@@ -133,9 +206,9 @@ async def _run_turn(ws: WebSocket, audio: bytes, thread_id: str) -> None:
         json.dumps(
             {
                 "type": "turn_end",
-                "answer_text": turn["answer"],
-                "guard_decisions": turn["guard"],
-                "sources": turn["chunks"][:3],
+                "answer_text": "".join(parts).strip() or meta["fallback"],
+                "guard_decisions": meta["guard"],
+                "sources": meta["chunks"][:3],
                 "timings": timings,
             }
         )

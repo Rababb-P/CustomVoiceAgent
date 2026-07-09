@@ -83,26 +83,54 @@ class ChatterboxEngine(_BaseEngine):
 
 
 class KokoroEngine(_BaseEngine):
-    """Fast generic-voice fallback; fine on CPU."""
+    """Fast generic-voice fallback; fine on CPU, near-instant on CUDA."""
 
-    def __init__(self, voice: str = "am_adam"):
+    def __init__(self, voice: str = "am_adam", device: str = "auto"):
         super().__init__()
         from kokoro import KPipeline
 
-        self._pipeline = KPipeline(lang_code="a")  # American English
+        if device == "auto":
+            try:
+                import torch
+
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+            except Exception:
+                device = "cpu"
+        try:
+            self._pipeline = KPipeline(lang_code="a", device=device)  # American English
+        except Exception:
+            if device == "cpu":
+                raise
+            logger.warning("Kokoro init on %s failed; falling back to CPU", device)
+            device = "cpu"
+            self._pipeline = KPipeline(lang_code="a", device=device)
+        logger.info("Kokoro on %s", device)
         self._voice = voice
         self.sample_rate = 24000
 
     async def synthesize(self, text: str) -> AsyncIterator[bytes]:
+        # Chunks are yielded as the pipeline produces them (queue fed from a
+        # worker thread), so first audio doesn't wait for the full sentence.
         self._reset()
         loop = asyncio.get_running_loop()
-        chunks = await loop.run_in_executor(
-            None, lambda: list(self._pipeline(text, voice=self._voice))
-        )
-        for _, _, audio in chunks:
-            if self._cancelled:
-                return
-            yield self._to_pcm16(np.asarray(audio))
+        queue: asyncio.Queue = asyncio.Queue()
+
+        def produce() -> None:
+            try:
+                for _, _, audio in self._pipeline(text, voice=self._voice):
+                    if hasattr(audio, "detach"):  # torch tensor, possibly on GPU
+                        audio = audio.detach().cpu().numpy()
+                    loop.call_soon_threadsafe(queue.put_nowait, np.asarray(audio))
+            finally:
+                loop.call_soon_threadsafe(queue.put_nowait, None)
+
+        producer = loop.run_in_executor(None, produce)
+        try:
+            while (audio := await queue.get()) is not None:
+                if not self._cancelled:
+                    yield self._to_pcm16(audio)
+        finally:
+            await producer
 
 
 def create_engine(config: dict | None = None) -> TTSEngine:
@@ -110,7 +138,7 @@ def create_engine(config: dict | None = None) -> TTSEngine:
     if cfg["engine"] == "chatterbox":
         return ChatterboxEngine(ROOT / cfg["reference_clip"])
     if cfg["engine"] == "kokoro":
-        return KokoroEngine(cfg.get("kokoro_voice", "am_adam"))
+        return KokoroEngine(cfg.get("kokoro_voice", "am_adam"), device=cfg.get("device", "auto"))
     raise ValueError(f"Unknown TTS engine: {cfg['engine']}")
 
 
