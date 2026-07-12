@@ -142,12 +142,18 @@ ASR fine-tune needs no recordings, just a GPU for the training step:
 `make prepare-asr` → `make train-asr` → `make export-asr`. Until then the
 server falls back to stock whisper-small with hotword biasing automatically.
 
+For a step-by-step explanation of the forward pass, loss, backward pass,
+AdamW update, and LoRA shapes, read [Explaining the training loop](docs/ASR_TRAINING.md).
+The executed notebook records a prior GPU run; its saved weights and training
+dataset are not included in this checkout. Restore the adapter to `runs/asr/final/`
+before exporting, or prepare the dataset for a new training run.
+
 ## Status
 
 | Phase | State |
 |---|---|
 | 0 — Scaffolding, LLM wrapper, tooling | ✅ done |
-| 1 — ASR fine-tune pipeline | ✅ code complete — synthetic data gen runs on CPU; training awaits a GPU run. Hotword biasing active today |
+| 1 — ASR fine-tune pipeline | ✅ code complete; notebook records prior GPU training. Restore model artifacts or train locally to enable the fine-tuned model |
 | 2 — RAG over life corpus | ✅ done — corpus stubs need my real content |
 | 3 — LangGraph agent | ✅ done |
 | 4 — Guardrails | ✅ done — red-team suite committed |
