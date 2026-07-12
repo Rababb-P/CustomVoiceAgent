@@ -1,13 +1,13 @@
 # Phases 3-6: agent, guards, TTS, server.
 llm:
-  agent_model: gemini-2.5-flash
-  guard_model: gemini-2.5-flash-lite     # guards + judges: higher RPM/RPD tier
-  judge_model: gemini-2.5-flash-lite
+  agent_model: gemini-3-flash-preview   # no GA gemini-3-flash on the API; gemini-3.5-flash is the newer alternative
+  guard_model: gemini-3.1-flash-lite     # guards + judges: higher RPM/RPD tier
+  judge_model: gemini-3.1-flash-lite
   temperature: 0.6
   # Client-side limits kept under the free tier (~10 RPM flash / 15 RPM flash-lite).
   rpm:
-    gemini-2.5-flash: 8
-    gemini-2.5-flash-lite: 12
+    gemini-3-flash-preview: 8
+    gemini-3.1-flash-lite: 12
   max_retries: 4
   cache_dir: .cache/llm
 

@@ -121,6 +121,16 @@ def get_chat_model(role: str = "agent", *, streaming: bool = False, config: dict
 # ---------------------------------------------------------------- plain-text path
 
 
+def _message_text(message) -> str:
+    """Message text on any langchain-core / Gemini pairing: content is a plain
+    string on 2.5 models but a content-block list (text + thought signatures)
+    on Gemini 3 — .content's repr would poison the guard/judge JSON parsing."""
+    if isinstance(message.content, str):
+        return message.content
+    text = message.text
+    return text if isinstance(text, str) else str(text())
+
+
 def generate(
     prompt: str,
     role: str = "guard",
@@ -142,7 +152,7 @@ def generate(
 
     if _call is None:
         chat = get_chat_model(role, config=cfg)
-        _call = lambda p: chat.invoke(p).content  # noqa: E731
+        _call = lambda p: _message_text(chat.invoke(p))  # noqa: E731
 
     _limiter_for(model, cfg).acquire()
 
