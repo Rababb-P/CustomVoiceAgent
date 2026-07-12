@@ -11,6 +11,12 @@ local TTS engine** speaks the answer back. Total API cost: **$0** — everything
 runs locally except the LLM, which rides the Gemini free tier behind a
 rate-limited, disk-cached client I wrote to make that survivable.
 
+## Demo
+
+▶ **[Watch the demo](airababbreparovid.mp4)** — mic → fine-tuned Whisper → guarded agent → Kokoro voice, end to end.
+
+https://github.com/Rababb-P/CustomVoiceAgent/raw/main/airababbreparovid.mp4
+
 ```
  mic audio ──► VAD ──► fine-tuned Whisper ──► input guard ──► LangGraph agent ◄──► RAG tools
  (browser)  (silero)   (LoRA + CTranslate2)   (heuristics +        │                (Chroma +
