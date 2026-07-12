@@ -29,7 +29,6 @@ asr = [
     "datasets>=2.20",
     "peft>=0.11",
     "accelerate>=0.30",
-    "evaluate>=0.4",
     "jiwer>=3.0",
     "librosa>=0.10",
     "soundfile>=0.12",
@@ -55,6 +54,9 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "ruff>=0.5",
+    # headless notebook execution (notebooks/)
+    "ipykernel>=6.29",
+    "nbclient>=0.10",
 ]
 
 [tool.ruff]
