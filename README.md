@@ -84,6 +84,7 @@ behind a config flag if I ever want it to sound like me.
 | [src/guardrails/](src/guardrails/) | Input guard, output guard (groundedness + PII), policy allow/denylists |
 | [src/tts/](src/tts/) | Kokoro TTS (default) + optional Chatterbox clone behind one async interface |
 | [src/server/](src/server/) | FastAPI WebSocket `/converse` (audio↔audio) + `POST /ask`, silero VAD |
+| [notebooks/](notebooks/) | The raw-PyTorch LoRA training loop, narrated cell-by-cell with a runnable demo |
 | [evals/](evals/) | Four eval suites + [report.py](evals/report.py) aggregator with the regression gate |
 | [tests/](tests/) | 42 unit tests — graph runs on a fake chat model: no API key, no quota |
 | [data/README.md](data/README.md) | Corpus format + eval JSONL schemas (audio/corpus never committed) |
