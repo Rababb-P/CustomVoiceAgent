@@ -1,0 +1,864 @@
+{
+  "decoding": {
+    "beam_size": 1,
+    "temperature": 0,
+    "language": "en",
+    "condition_on_previous_text": false,
+    "compute_type": "int8"
+  },
+  "base": {
+    "synthetic_validation": {
+      "n": 32,
+      "wer": 0.06802721088435375,
+      "normalized_wer": 0.05782312925170068,
+      "cer": 0.02225841476655809,
+      "term_accuracy": {
+        "WATonomous": 0.0,
+        "Reparo": 1.0,
+        "YOLOv11": 0.0,
+        "ROS2": 1.0,
+        "Slurm": 1.0,
+        "Thevenin": 0.167,
+        "Waterloo": 1.0,
+        "LangGraph": 1.0
+      },
+      "predictions": [
+        {
+          "reference": "My work with WATonomous involved testing the perception pipeline.",
+          "prediction": "My work with WA Tarnimus involved testing the perception pipeline."
+        },
+        {
+          "reference": "Our WATonomous demo showed the perception system running live.",
+          "prediction": "Our WA Tarnimus demo showed the perception system running live."
+        },
+        {
+          "reference": "What problem were you trying to solve with Reparo?",
+          "prediction": "What problem were you trying to solve with Reparo?"
+        },
+        {
+          "reference": "We compared the YOLOv11 outputs with our validation labels.",
+          "prediction": "We compared the YAL of 11 outputs with our validation labels."
+        },
+        {
+          "reference": "We inspected the YOLOv11 confidence threshold during testing.",
+          "prediction": "We inspected the Yalov 11 confidence threshold during testing."
+        },
+        {
+          "reference": "The camera publishes image messages on a ROS2 topic.",
+          "prediction": "The camera publishes image messages on a ROS2 topic."
+        },
+        {
+          "reference": "We used ROS2 nodes to separate perception from control.",
+          "prediction": "We used ROS2 nodes to separate perception from control."
+        },
+        {
+          "reference": "Tell me how you debugged communication between ROS2 nodes.",
+          "prediction": "Tell me how you debugged communication between ROS2 nodes."
+        },
+        {
+          "reference": "Our ROS2 integration needed consistent timestamps from the sensors.",
+          "prediction": "Our ROS2 integration needed consistent timestamps from the sensors."
+        },
+        {
+          "reference": "Can you describe the role of a ROS2 service?",
+          "prediction": "Can you describe the role of a ROS2 service?"
+        },
+        {
+          "reference": "We tested the ROS2 pipeline before connecting the hardware.",
+          "prediction": "We tested the ROS2 pipeline before connecting the hardware."
+        },
+        {
+          "reference": "I want to understand how ROS2 handles asynchronous data.",
+          "prediction": "I want to understand how ROS2 handles asynchronous data."
+        },
+        {
+          "reference": "Tell me how you monitored a long running Slurm job.",
+          "prediction": "Tell me how you monitored a long running slurm job."
+        },
+        {
+          "reference": "The Slurm output file contained the final training metrics.",
+          "prediction": "The Slurm output file contained the final training metrics."
+        },
+        {
+          "reference": "We calculated the Thevenin voltage across the open terminals.",
+          "prediction": "We calculated the the Venon voltage across the open terminals."
+        },
+        {
+          "reference": "I checked the Thevenin calculation against the original circuit.",
+          "prediction": "I checked the thevenin calculation against the original circuit."
+        },
+        {
+          "reference": "We solved the circuit by first finding its Thevenin equivalent.",
+          "prediction": "We solved the circuit by first finding it's the Vennin equivalent."
+        },
+        {
+          "reference": "The Thevenin resistance depends on the network seen from the terminals.",
+          "prediction": "The Davenin resistance depends on the network seen from the terminals."
+        },
+        {
+          "reference": "Please walk through the steps of this Thevenin calculation.",
+          "prediction": "Please walk through the steps of this the Venin calculation."
+        },
+        {
+          "reference": "The Thevenin equivalent makes the final calculation much easier.",
+          "prediction": "The DaVenon equivalent makes the final calculation much easier."
+        },
+        {
+          "reference": "What are you studying at the University of Waterloo?",
+          "prediction": "What are you studying at the University of Waterloo?"
+        },
+        {
+          "reference": "I joined a robotics team while studying at Waterloo.",
+          "prediction": "I joined a robotics team while studying at Waterloo."
+        },
+        {
+          "reference": "How do you balance coursework and projects at Waterloo?",
+          "prediction": "How do you balance coursework and projects at Waterloo?"
+        },
+        {
+          "reference": "I learned to debug complex systems through my work at Waterloo.",
+          "prediction": "I learned to debug complex systems through my work at Waterloo."
+        },
+        {
+          "reference": "Tell me about collaboration with other students at Waterloo.",
+          "prediction": "Tell me about collaboration with other students at Waterloo."
+        },
+        {
+          "reference": "The Waterloo project required both hardware and software testing.",
+          "prediction": "The Waterloo project required both hardware and software testing."
+        },
+        {
+          "reference": "The LangGraph agent checks facts before returning its answer.",
+          "prediction": "The LangGraph agent checks facts before returning its answer."
+        },
+        {
+          "reference": "What would you improve if you had another week?",
+          "prediction": "What would you improve if you had another week?"
+        },
+        {
+          "reference": "How did you decide which feature to build first?",
+          "prediction": "How did you decide which feature to build first?"
+        },
+        {
+          "reference": "The user can interrupt the agent while it is speaking.",
+          "prediction": "The user can interrupt the agent while it is speaking."
+        },
+        {
+          "reference": "We used a small batch size to reduce memory usage.",
+          "prediction": "We used a small batch size to reduce memory usage."
+        },
+        {
+          "reference": "What would you monitor after deploying the application?",
+          "prediction": "What would you monitor after deploying the application?"
+        }
+      ]
+    },
+    "common_voice_test": {
+      "n": 32,
+      "wer": 0.28679245283018867,
+      "normalized_wer": 0.2188679245283019,
+      "cer": 0.14236588720770288,
+      "term_accuracy": {},
+      "predictions": [
+        {
+          "reference": "Joe Keaton disapproved of films, and Buster also had reservations about the medium.",
+          "prediction": "Joe Keaton disapproved of films and Buster also had reservations about the medium."
+        },
+        {
+          "reference": "She'll be all right.",
+          "prediction": "She'd be alright."
+        },
+        {
+          "reference": "Six",
+          "prediction": "6"
+        },
+        {
+          "reference": "All's well that ends well.",
+          "prediction": "All is well that ends well."
+        },
+        {
+          "reference": "It is a busy market town that serves a large surrounding area.",
+          "prediction": "It is a busy market town that serves a large, surrounded area."
+        },
+        {
+          "reference": "We are going to the football game tonight.",
+          "prediction": "They're going to the football game tonight."
+        },
+        {
+          "reference": "Elizabeth was about the same age as Maria.",
+          "prediction": "This is the voice of DC Major Maria"
+        },
+        {
+          "reference": "Do you mean it?",
+          "prediction": "Do you mean it?"
+        },
+        {
+          "reference": "How is Mozilla going to handle ambiguities like Queue and Cue?",
+          "prediction": "How is Mozilla going to handle ambiguities like Q and Q?"
+        },
+        {
+          "reference": "You are so rude!",
+          "prediction": "You are so rude."
+        },
+        {
+          "reference": "I guess you must think I'm kinda Batty.",
+          "prediction": "Wish you the same kind and a party."
+        },
+        {
+          "reference": "No one near the remote machine you could ring?",
+          "prediction": "No one near the remote machine you could ring."
+        },
+        {
+          "reference": "Groves started writing songs when she was four years old.",
+          "prediction": "Grafs started writing songs when she was four years old."
+        },
+        {
+          "reference": "This led to both the Red terror and the White terror.",
+          "prediction": "This led to both the red tear and the white tear."
+        },
+        {
+          "reference": "The Sacramento valley rail station is just a short walk away.",
+          "prediction": "The Sacramento Valley Rail Station is just a short walk away."
+        },
+        {
+          "reference": "The most recent Presidents of the United States are Donald Trump, Barack Obama, and George W. Bush.",
+          "prediction": "The most recent presidents of the United States are Donald Trump, Barack Obama, and George W. Bush."
+        },
+        {
+          "reference": "There was nothing to hold him back except himself.",
+          "prediction": "There was nothing to hold him back except himself."
+        },
+        {
+          "reference": "These locomotives are serviced at Washwood Heath.",
+          "prediction": "These locomotives are serviced at Washwood Heath."
+        },
+        {
+          "reference": "It might be in this writer's top ten!",
+          "prediction": "It might be in this writer's top 10."
+        },
+        {
+          "reference": "We spoke often.",
+          "prediction": "We spoke often."
+        },
+        {
+          "reference": "Mrs. Lewis was selected as the new Commissioner.",
+          "prediction": "Mrs. Lewis was selected as the new commissioner."
+        },
+        {
+          "reference": "The Electrician looked puzzled.",
+          "prediction": "This is the depression loop puzzle."
+        },
+        {
+          "reference": "The ladder on the fire truck was not long enough.",
+          "prediction": "The ladder on the fire truck was not low enough."
+        },
+        {
+          "reference": "I will tell her what we decided.",
+          "prediction": "I will tell her what we decided."
+        },
+        {
+          "reference": "Enoxaparin belongs to the class of drugs known as low molecular weight Heparins.",
+          "prediction": "Hello, good morning. An experienced belongs to the class of notes, notes, no molecular weight, upper and lower."
+        },
+        {
+          "reference": "I guess, it's a Never-Ending story.",
+          "prediction": "I guess it's a never ending story."
+        },
+        {
+          "reference": "Good things come in small packages.",
+          "prediction": "Good things come in small packages."
+        },
+        {
+          "reference": "It is a member theater of the Union of the theatres of Europe.",
+          "prediction": "It is a member theater of the Union of the Theaters of Europe."
+        },
+        {
+          "reference": "I like apples, pears, and Pomegranate, but I do like strawberries or grapes.",
+          "prediction": "I like apples, pears, and pomegranate, but I do like strawberries or grapes."
+        },
+        {
+          "reference": "You wanNA take this outside?",
+          "prediction": "You want to take this outside."
+        },
+        {
+          "reference": "The immersion in hot water also kills the Silkworm Pupa.",
+          "prediction": "The immersion in hot water also kills the sick burn. Hoopa."
+        },
+        {
+          "reference": "She married her business partner, Steve Lane.",
+          "prediction": "She married her business partner Stephen Lee."
+        }
+      ]
+    }
+  },
+  "base_hotwords": {
+    "synthetic_validation": {
+      "n": 32,
+      "wer": 0.03741496598639456,
+      "normalized_wer": 0.02040816326530612,
+      "cer": 0.010857763300760043,
+      "term_accuracy": {
+        "WATonomous": 0.0,
+        "Reparo": 1.0,
+        "YOLOv11": 1.0,
+        "ROS2": 1.0,
+        "Slurm": 1.0,
+        "Thevenin": 0.833,
+        "Waterloo": 1.0,
+        "LangGraph": 1.0
+      },
+      "predictions": [
+        {
+          "reference": "My work with WATonomous involved testing the perception pipeline.",
+          "prediction": "My work with WA-tonomous involved testing the perception pipeline."
+        },
+        {
+          "reference": "Our WATonomous demo showed the perception system running live.",
+          "prediction": "Our WA Tarnomous demo showed the perception system running live."
+        },
+        {
+          "reference": "What problem were you trying to solve with Reparo?",
+          "prediction": "What problem were you trying to solve with Reparo?"
+        },
+        {
+          "reference": "We compared the YOLOv11 outputs with our validation labels.",
+          "prediction": "We compared the YOLOv11 outputs with our validation labels."
+        },
+        {
+          "reference": "We inspected the YOLOv11 confidence threshold during testing.",
+          "prediction": "We inspected the YOLOv11 confidence threshold during testing."
+        },
+        {
+          "reference": "The camera publishes image messages on a ROS2 topic.",
+          "prediction": "The camera publishes image messages on a ROS2 topic."
+        },
+        {
+          "reference": "We used ROS2 nodes to separate perception from control.",
+          "prediction": "We used ROS2 nodes to separate perception from control."
+        },
+        {
+          "reference": "Tell me how you debugged communication between ROS2 nodes.",
+          "prediction": "Tell me how you debugged communication between ROS2 nodes."
+        },
+        {
+          "reference": "Our ROS2 integration needed consistent timestamps from the sensors.",
+          "prediction": "Our ROS2 integration needed consistent timestamps from the sensors."
+        },
+        {
+          "reference": "Can you describe the role of a ROS2 service?",
+          "prediction": "Can you describe the role of a ROS2 service?"
+        },
+        {
+          "reference": "We tested the ROS2 pipeline before connecting the hardware.",
+          "prediction": "We tested the ROS2 pipeline before connecting the hardware."
+        },
+        {
+          "reference": "I want to understand how ROS2 handles asynchronous data.",
+          "prediction": "I want to understand how ROS2 handles asynchronous data."
+        },
+        {
+          "reference": "Tell me how you monitored a long running Slurm job.",
+          "prediction": "Tell me how you monitored a long running slurm job."
+        },
+        {
+          "reference": "The Slurm output file contained the final training metrics.",
+          "prediction": "The Slurm output file contained the final training metrics."
+        },
+        {
+          "reference": "We calculated the Thevenin voltage across the open terminals.",
+          "prediction": "We calculated the thevenin voltage across the open terminals."
+        },
+        {
+          "reference": "I checked the Thevenin calculation against the original circuit.",
+          "prediction": "I checked the thevenin calculation against the original circuit."
+        },
+        {
+          "reference": "We solved the circuit by first finding its Thevenin equivalent.",
+          "prediction": "We solved the circuit by first finding it's the Venin equivalent."
+        },
+        {
+          "reference": "The Thevenin resistance depends on the network seen from the terminals.",
+          "prediction": "Thevenin resistance depends on the network seen from the terminals."
+        },
+        {
+          "reference": "Please walk through the steps of this Thevenin calculation.",
+          "prediction": "Please walk through the steps of this Thevenin calculation."
+        },
+        {
+          "reference": "The Thevenin equivalent makes the final calculation much easier.",
+          "prediction": "Thevenin equivalent makes the final calculation much easier."
+        },
+        {
+          "reference": "What are you studying at the University of Waterloo?",
+          "prediction": "What are you studying at the University of Waterloo?"
+        },
+        {
+          "reference": "I joined a robotics team while studying at Waterloo.",
+          "prediction": "I joined a robotics team while studying at Waterloo."
+        },
+        {
+          "reference": "How do you balance coursework and projects at Waterloo?",
+          "prediction": "How do you balance coursework and projects at Waterloo?"
+        },
+        {
+          "reference": "I learned to debug complex systems through my work at Waterloo.",
+          "prediction": "I learned to debug complex systems through my work at Waterloo."
+        },
+        {
+          "reference": "Tell me about collaboration with other students at Waterloo.",
+          "prediction": "Tell me about collaboration with other students at Waterloo."
+        },
+        {
+          "reference": "The Waterloo project required both hardware and software testing.",
+          "prediction": "The Waterloo project required both hardware and software testing."
+        },
+        {
+          "reference": "The LangGraph agent checks facts before returning its answer.",
+          "prediction": "The LangGraph agent checks facts before returning its answer."
+        },
+        {
+          "reference": "What would you improve if you had another week?",
+          "prediction": "What would you improve if you had another week?"
+        },
+        {
+          "reference": "How did you decide which feature to build first?",
+          "prediction": "How did you decide which feature to build first?"
+        },
+        {
+          "reference": "The user can interrupt the agent while it is speaking.",
+          "prediction": "The user can interrupt the agent while it is speaking."
+        },
+        {
+          "reference": "We used a small batch size to reduce memory usage.",
+          "prediction": "We used a small batch size to reduce memory usage."
+        },
+        {
+          "reference": "What would you monitor after deploying the application?",
+          "prediction": "What would you monitor after deploying the application?"
+        }
+      ]
+    },
+    "common_voice_test": {
+      "n": 32,
+      "wer": 0.2830188679245283,
+      "normalized_wer": 0.21132075471698114,
+      "cer": 0.1375515818431912,
+      "term_accuracy": {},
+      "predictions": [
+        {
+          "reference": "Joe Keaton disapproved of films, and Buster also had reservations about the medium.",
+          "prediction": "Joe Keaton disapproved of films and Buster also had reservations about the medium."
+        },
+        {
+          "reference": "She'll be all right.",
+          "prediction": "Should be alright"
+        },
+        {
+          "reference": "Six",
+          "prediction": "6"
+        },
+        {
+          "reference": "All's well that ends well.",
+          "prediction": "All is well that ends well."
+        },
+        {
+          "reference": "It is a busy market town that serves a large surrounding area.",
+          "prediction": "It is a busy market town that serves a large, surrounded area."
+        },
+        {
+          "reference": "We are going to the football game tonight.",
+          "prediction": "They're going to the football game tonight."
+        },
+        {
+          "reference": "Elizabeth was about the same age as Maria.",
+          "prediction": "This is the waterloo of the city of Maria"
+        },
+        {
+          "reference": "Do you mean it?",
+          "prediction": "Do you mean it?"
+        },
+        {
+          "reference": "How is Mozilla going to handle ambiguities like Queue and Cue?",
+          "prediction": "How is Mozilla going to handle ambilities like Q and Q?"
+        },
+        {
+          "reference": "You are so rude!",
+          "prediction": "You are so rude."
+        },
+        {
+          "reference": "I guess you must think I'm kinda Batty.",
+          "prediction": "Wishing to see you kind of a party"
+        },
+        {
+          "reference": "No one near the remote machine you could ring?",
+          "prediction": "No one near the remote machine you could ring."
+        },
+        {
+          "reference": "Groves started writing songs when she was four years old.",
+          "prediction": "Graphs started writing songs when she was 4 years old."
+        },
+        {
+          "reference": "This led to both the Red terror and the White terror.",
+          "prediction": "This led to both the red tear and the white tear."
+        },
+        {
+          "reference": "The Sacramento valley rail station is just a short walk away.",
+          "prediction": "The Sacramento Valley Rail Station is just a short walk away."
+        },
+        {
+          "reference": "The most recent Presidents of the United States are Donald Trump, Barack Obama, and George W. Bush.",
+          "prediction": "The most recent presidents of the United States are Donald Trump, Barack Obama, and George W. Bush."
+        },
+        {
+          "reference": "There was nothing to hold him back except himself.",
+          "prediction": "There was nothing to hold him back except himself."
+        },
+        {
+          "reference": "These locomotives are serviced at Washwood Heath.",
+          "prediction": "These locomotives are serviced at Washwood Heath."
+        },
+        {
+          "reference": "It might be in this writer's top ten!",
+          "prediction": "It might be in this writer's top 10."
+        },
+        {
+          "reference": "We spoke often.",
+          "prediction": "We spoke often."
+        },
+        {
+          "reference": "Mrs. Lewis was selected as the new Commissioner.",
+          "prediction": "Mrs. Lewis was selected as the new commissioner."
+        },
+        {
+          "reference": "The Electrician looked puzzled.",
+          "prediction": "In the depression loop puzzle"
+        },
+        {
+          "reference": "The ladder on the fire truck was not long enough.",
+          "prediction": "The ladder on the fire truck was not low enough."
+        },
+        {
+          "reference": "I will tell her what we decided.",
+          "prediction": "I will tell her what we decided"
+        },
+        {
+          "reference": "Enoxaparin belongs to the class of drugs known as low molecular weight Heparins.",
+          "prediction": "Hello, good morning. An experiment belongs to the class of notes known as the molecular weight of a newspaper."
+        },
+        {
+          "reference": "I guess, it's a Never-Ending story.",
+          "prediction": "I guess it's a never ending story."
+        },
+        {
+          "reference": "Good things come in small packages.",
+          "prediction": "Good things come in small packages."
+        },
+        {
+          "reference": "It is a member theater of the Union of the theatres of Europe.",
+          "prediction": "It is a member theater of the Union of the Theaters of Europe."
+        },
+        {
+          "reference": "I like apples, pears, and Pomegranate, but I do like strawberries or grapes.",
+          "prediction": "I like apples, pears, and pomegranate, but I do like strawberries or grapes."
+        },
+        {
+          "reference": "You wanNA take this outside?",
+          "prediction": "You wanna take this outside."
+        },
+        {
+          "reference": "The immersion in hot water also kills the Silkworm Pupa.",
+          "prediction": "The immersion in hot water also kills the sick worm, boopa."
+        },
+        {
+          "reference": "She married her business partner, Steve Lane.",
+          "prediction": "She married her business partner Steven Lee."
+        }
+      ]
+    }
+  },
+  "finetuned": {
+    "synthetic_validation": {
+      "n": 32,
+      "wer": 0.01020408163265306,
+      "normalized_wer": 0.01020408163265306,
+      "cer": 0.0016286644951140066,
+      "term_accuracy": {
+        "WATonomous": 1.0,
+        "Reparo": 1.0,
+        "YOLOv11": 1.0,
+        "ROS2": 1.0,
+        "Slurm": 1.0,
+        "Thevenin": 1.0,
+        "Waterloo": 1.0,
+        "LangGraph": 1.0
+      },
+      "predictions": [
+        {
+          "reference": "My work with WATonomous involved testing the perception pipeline.",
+          "prediction": "My work with WATonomous involved testing the perception pipeline."
+        },
+        {
+          "reference": "Our WATonomous demo showed the perception system running live.",
+          "prediction": "Our WATonomous demo showed the perception system running live."
+        },
+        {
+          "reference": "What problem were you trying to solve with Reparo?",
+          "prediction": "What problem were you trying to solve with Reparo?"
+        },
+        {
+          "reference": "We compared the YOLOv11 outputs with our validation labels.",
+          "prediction": "We compared the YOLOv11 outputs with our validation labels."
+        },
+        {
+          "reference": "We inspected the YOLOv11 confidence threshold during testing.",
+          "prediction": "We inspected the YOLOv11 confidence threshold during testing."
+        },
+        {
+          "reference": "The camera publishes image messages on a ROS2 topic.",
+          "prediction": "The camera publishes image messages on a ROS2 topic."
+        },
+        {
+          "reference": "We used ROS2 nodes to separate perception from control.",
+          "prediction": "We used ROS2 nodes to separate perception from control."
+        },
+        {
+          "reference": "Tell me how you debugged communication between ROS2 nodes.",
+          "prediction": "Tell me how you debugged communication between ROS2 nodes."
+        },
+        {
+          "reference": "Our ROS2 integration needed consistent timestamps from the sensors.",
+          "prediction": "Our ROS2 integration needed consistent timestamps from the sensors."
+        },
+        {
+          "reference": "Can you describe the role of a ROS2 service?",
+          "prediction": "Can you describe the role of a ROS2 service?"
+        },
+        {
+          "reference": "We tested the ROS2 pipeline before connecting the hardware.",
+          "prediction": "We tested the ROS2 pipeline before connecting the hardware."
+        },
+        {
+          "reference": "I want to understand how ROS2 handles asynchronous data.",
+          "prediction": "I want to understand how ROS2 handles asynchronous data."
+        },
+        {
+          "reference": "Tell me how you monitored a long running Slurm job.",
+          "prediction": "Tell me how you monitored a long-running Slurm job."
+        },
+        {
+          "reference": "The Slurm output file contained the final training metrics.",
+          "prediction": "The Slurm output file contained the final training metrics."
+        },
+        {
+          "reference": "We calculated the Thevenin voltage across the open terminals.",
+          "prediction": "We calculated the Thevenin voltage across the open terminals."
+        },
+        {
+          "reference": "I checked the Thevenin calculation against the original circuit.",
+          "prediction": "I checked the Thevenin calculation against the original circuit."
+        },
+        {
+          "reference": "We solved the circuit by first finding its Thevenin equivalent.",
+          "prediction": "We solved the circuit by first finding its Thevenin equivalent."
+        },
+        {
+          "reference": "The Thevenin resistance depends on the network seen from the terminals.",
+          "prediction": "The Thevenin resistance depends on the network scene from the terminals."
+        },
+        {
+          "reference": "Please walk through the steps of this Thevenin calculation.",
+          "prediction": "Please walk through the steps of this Thevenin calculation."
+        },
+        {
+          "reference": "The Thevenin equivalent makes the final calculation much easier.",
+          "prediction": "The Thevenin equivalent makes the final calculation much easier."
+        },
+        {
+          "reference": "What are you studying at the University of Waterloo?",
+          "prediction": "What are you studying at the University of Waterloo?"
+        },
+        {
+          "reference": "I joined a robotics team while studying at Waterloo.",
+          "prediction": "I joined a robotics team while studying at Waterloo."
+        },
+        {
+          "reference": "How do you balance coursework and projects at Waterloo?",
+          "prediction": "How do you balance coursework and projects at Waterloo?"
+        },
+        {
+          "reference": "I learned to debug complex systems through my work at Waterloo.",
+          "prediction": "I learned to debug complex systems through my work at Waterloo."
+        },
+        {
+          "reference": "Tell me about collaboration with other students at Waterloo.",
+          "prediction": "Tell me about collaboration with other students at Waterloo."
+        },
+        {
+          "reference": "The Waterloo project required both hardware and software testing.",
+          "prediction": "The Waterloo project required both hardware and software testing."
+        },
+        {
+          "reference": "The LangGraph agent checks facts before returning its answer.",
+          "prediction": "The LangGraph agent checks facts before returning its answer."
+        },
+        {
+          "reference": "What would you improve if you had another week?",
+          "prediction": "What would you improve if you had another week?"
+        },
+        {
+          "reference": "How did you decide which feature to build first?",
+          "prediction": "How did you decide which feature to build first?"
+        },
+        {
+          "reference": "The user can interrupt the agent while it is speaking.",
+          "prediction": "The user can interrupt the agent while it is speaking."
+        },
+        {
+          "reference": "We used a small batch size to reduce memory usage.",
+          "prediction": "We used a small batch size to reduce memory usage."
+        },
+        {
+          "reference": "What would you monitor after deploying the application?",
+          "prediction": "What would you monitor after deploying the application?"
+        }
+      ]
+    },
+    "common_voice_test": {
+      "n": 32,
+      "wer": 0.2830188679245283,
+      "normalized_wer": 0.21509433962264152,
+      "cer": 0.12998624484181567,
+      "term_accuracy": {},
+      "predictions": [
+        {
+          "reference": "Joe Keaton disapproved of films, and Buster also had reservations about the medium.",
+          "prediction": "Joel Keaton disapproved of films and Buster also had reservations about the medium."
+        },
+        {
+          "reference": "She'll be all right.",
+          "prediction": "Should be alright."
+        },
+        {
+          "reference": "Six",
+          "prediction": "Six."
+        },
+        {
+          "reference": "All's well that ends well.",
+          "prediction": "All is well that ends well."
+        },
+        {
+          "reference": "It is a busy market town that serves a large surrounding area.",
+          "prediction": "It is a busy market town that serves a large surrounded area."
+        },
+        {
+          "reference": "We are going to the football game tonight.",
+          "prediction": "They're going to the football game tonight."
+        },
+        {
+          "reference": "Elizabeth was about the same age as Maria.",
+          "prediction": "It's a bit more support the same as Maria."
+        },
+        {
+          "reference": "Do you mean it?",
+          "prediction": "Do you mean it?"
+        },
+        {
+          "reference": "How is Mozilla going to handle ambiguities like Queue and Cue?",
+          "prediction": "How is Mozilla going to handle ambivities like Q and Q?"
+        },
+        {
+          "reference": "You are so rude!",
+          "prediction": "You are so rude."
+        },
+        {
+          "reference": "I guess you must think I'm kinda Batty.",
+          "prediction": "Wish you the same kind and a party."
+        },
+        {
+          "reference": "No one near the remote machine you could ring?",
+          "prediction": "No one near the remote machine you could ring."
+        },
+        {
+          "reference": "Groves started writing songs when she was four years old.",
+          "prediction": "Graphs started writing songs when she was four years older."
+        },
+        {
+          "reference": "This led to both the Red terror and the White terror.",
+          "prediction": "This led to both the red tear and the white tear."
+        },
+        {
+          "reference": "The Sacramento valley rail station is just a short walk away.",
+          "prediction": "The Sacramento Valley Rail Station is just a short walk away."
+        },
+        {
+          "reference": "The most recent Presidents of the United States are Donald Trump, Barack Obama, and George W. Bush.",
+          "prediction": "The most recent presidents of the United States are Donald Trump, Barack Obama, and George W. Bush."
+        },
+        {
+          "reference": "There was nothing to hold him back except himself.",
+          "prediction": "There was nothing to hold him back except himself."
+        },
+        {
+          "reference": "These locomotives are serviced at Washwood Heath.",
+          "prediction": "These locomotives are serviced at Washwood Heath."
+        },
+        {
+          "reference": "It might be in this writer's top ten!",
+          "prediction": "It might be in this writer's top ten."
+        },
+        {
+          "reference": "We spoke often.",
+          "prediction": "We spoke often."
+        },
+        {
+          "reference": "Mrs. Lewis was selected as the new Commissioner.",
+          "prediction": "Mrs. Lewis was selected as the new commissioner."
+        },
+        {
+          "reference": "The Electrician looked puzzled.",
+          "prediction": "The depression loop puzzle."
+        },
+        {
+          "reference": "The ladder on the fire truck was not long enough.",
+          "prediction": "The ladder on the firetruck was not low enough."
+        },
+        {
+          "reference": "I will tell her what we decided.",
+          "prediction": "I will tell her what we decided."
+        },
+        {
+          "reference": "Enoxaparin belongs to the class of drugs known as low molecular weight Heparins.",
+          "prediction": "Hello everyone. An outspirited belongs to the class of notes known as the molecular word for the notes."
+        },
+        {
+          "reference": "I guess, it's a Never-Ending story.",
+          "prediction": "I guess it's a never-ending story."
+        },
+        {
+          "reference": "Good things come in small packages.",
+          "prediction": "Good things come in small packages."
+        },
+        {
+          "reference": "It is a member theater of the Union of the theatres of Europe.",
+          "prediction": "It is a member theatre of the Union of the Theaters of Europe."
+        },
+        {
+          "reference": "I like apples, pears, and Pomegranate, but I do like strawberries or grapes.",
+          "prediction": "I like apples, pears and pomegranate, but I do like strawberries or grapes."
+        },
+        {
+          "reference": "You wanNA take this outside?",
+          "prediction": "You want to take this outside."
+        },
+        {
+          "reference": "The immersion in hot water also kills the Silkworm Pupa.",
+          "prediction": "The immersion in Hardwater also kills the sixth one, Hoopa."
+        },
+        {
+          "reference": "She married her business partner, Steve Lane.",
+          "prediction": "She married her business partner Stephen Lee."
+        }
+      ]
+    }
+  }
+}

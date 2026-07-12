@@ -23,6 +23,8 @@ for batch in dataloader:
   Preprocessing applies an STFT, mel filters, and a log transform.
 - `labels` contains transcript token IDs. Whisper shifts these right to form
   decoder inputs, so each position learns to predict the next token.
+  `load_processor` explicitly sets the English/transcription prefix on the fast
+  tokenizer backend, ensuring those task tokens are present in the encoded labels.
 - The loss is token cross-entropy: it penalizes low probability on the correct
   token. Padding is replaced with `-100` so it contributes no loss. The collator
   removes the initial decoder-start token because Whisper adds it when shifting.
@@ -96,15 +98,21 @@ decoder positions from seeing future transcript tokens during training.
 
 ## Saved model status
 
-The executed [notebook](../notebooks/asr_finetune_pytorch.ipynb) records a
-previous GPU run and reports results for a full fine-tune. Those recorded
-results are not a new evaluation of this code. At this revision, the adapter,
-exported model, and prepared training dataset are absent from this checkout;
-`runs/` and `models/` are gitignored. Notebook output alone cannot restore weights.
+The [included adapter](../artifacts/asr/whisper-small-lora/README.md) comes from
+a new CPU training run on 512 examples. Its model card includes the measured
+results, and the [reproduction guide](ASR_RETRAINING.md) explains the dataset
+and commands. The executed [notebook](../notebooks/asr_finetune_pytorch.ipynb)
+records a separate, earlier GPU run; its numbers do not describe these new weights.
 
-Restore the existing adapter plus processor files into `runs/asr/final/`, then
-run `python -m src.asr.export`. If no copy exists, prepare paired audio/transcripts
-and run `python -m src.asr.train`. A random test model is not a trained ASR artifact.
+To merge the included adapter and export it for the voice server:
+
+```bash
+python -m src.asr.export --config configs/asr_retrain_cpu.yaml \
+  --adapter-dir artifacts/asr/whisper-small-lora
+```
+
+Alternatively, download the ready-to-use CTranslate2 model from the
+[ASR release](https://github.com/Rababb-P/CustomVoiceAgent/releases/tag/asr-retrain-2026-09-17).
 
 References: [PEFT LoRA](https://huggingface.co/docs/peft/en/developer_guides/lora),
 [PyTorch mixed precision](https://docs.pytorch.org/docs/stable/notes/amp_examples.html).

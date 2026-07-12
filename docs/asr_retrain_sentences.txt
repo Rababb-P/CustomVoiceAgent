@@ -1,0 +1,160 @@
+What did you build on the WATonomous perception team?
+Tell me how WATonomous handles objects around the vehicle.
+My work with WATonomous involved testing the perception pipeline.
+How did you debug the camera integration at WATonomous?
+The WATonomous robot needs reliable detections before it can plan.
+Explain your main technical contribution to WATonomous this year.
+What was the hardest problem you encountered at WATonomous?
+We reviewed the WATonomous logs after every test drive.
+Why did you decide to join WATonomous at university?
+Can you describe the software architecture used by WATonomous?
+Our WATonomous demo showed the perception system running live.
+I would like to hear about collaboration within WATonomous.
+Which tools helped you evaluate the WATonomous detection model?
+The WATonomous team compared predictions against annotated camera frames.
+How did WATonomous test changes before deploying them?
+What lessons from WATonomous would you apply to another project?
+What problem were you trying to solve with Reparo?
+Tell me how the Reparo application works from beginning to end.
+We built the first Reparo prototype during a hackathon.
+Which part of Reparo did you implement yourself?
+The Reparo demo explained the repair workflow to the judges.
+How did you choose the technology stack for Reparo?
+Can you walk me through the main Reparo user interface?
+Our team tested Reparo with several example repair requests.
+What would you change if you rebuilt Reparo today?
+I want to understand the biggest technical challenge behind Reparo.
+The next version of Reparo needs clearer error messages.
+How did your teammates divide the work on Reparo?
+Show me where Reparo turns a user request into a response.
+We kept the Reparo prototype focused on the core functionality.
+How would you measure whether Reparo actually helps its users?
+Please describe one design decision you made while building Reparo.
+Why did you choose YOLOv11 for object detection?
+We trained YOLOv11 using annotated images from the camera.
+How did YOLOv11 perform on small objects in the distance?
+Tell me how you evaluated the YOLOv11 predictions.
+The YOLOv11 model returns bounding boxes and confidence scores.
+What did you do when YOLOv11 missed an important object?
+Can YOLOv11 run quickly enough for the robotics demo?
+We compared the YOLOv11 outputs with our validation labels.
+Explain how you prepared the dataset before training YOLOv11.
+The new YOLOv11 checkpoint improved detection on difficult frames.
+What tradeoffs did you consider when configuring YOLOv11?
+I used YOLOv11 as part of the perception pipeline.
+How would you reduce false positives from YOLOv11?
+We inspected the YOLOv11 confidence threshold during testing.
+Which metrics matter most when assessing a YOLOv11 detector?
+Please explain how YOLOv11 connects to the rest of the system.
+How did you use ROS2 to connect the robot components?
+The camera publishes image messages on a ROS2 topic.
+We used ROS2 nodes to separate perception from control.
+Tell me how you debugged communication between ROS2 nodes.
+What happens when a ROS2 subscriber receives a new message?
+Explain why you chose ROS2 for the robotics project.
+The ROS2 launch file starts the components in the correct order.
+How would you inspect the messages flowing through ROS2?
+Our ROS2 integration needed consistent timestamps from the sensors.
+Can you describe the role of a ROS2 service?
+We tested the ROS2 pipeline before connecting the hardware.
+Which ROS2 tools helped you diagnose the timing problem?
+The perception output becomes another message in the ROS2 graph.
+How did you organize the ROS2 packages in your repository?
+I want to understand how ROS2 handles asynchronous data.
+What would you change about your ROS2 setup for deployment?
+How did you submit your training jobs using Slurm?
+The Slurm script requests memory and a graphics processor.
+We checked the Slurm queue before starting another experiment.
+Tell me how you monitored a long running Slurm job.
+What happens when a Slurm job exceeds its time limit?
+I used Slurm to manage experiments on the computing cluster.
+The Slurm output file contained the final training metrics.
+Can you explain the resource settings in your Slurm script?
+We cancelled the failed Slurm job and corrected the configuration.
+How did Slurm help you organize multiple training runs?
+The next Slurm job will use a different learning rate.
+What did you do when your Slurm job stayed pending?
+Please describe how you saved checkpoints during a Slurm run.
+We compared the results from several Slurm batch jobs.
+How would you reproduce an experiment originally launched through Slurm?
+The Slurm scheduler assigns resources when they become available.
+Can you explain the Thevenin equivalent of this circuit?
+We calculated the Thevenin voltage across the open terminals.
+How do you find the resistance in a Thevenin model?
+The Thevenin theorem helps simplify a complicated electrical network.
+Tell me when you would use a Thevenin equivalent.
+I checked the Thevenin calculation against the original circuit.
+What changes when you connect a load to the Thevenin source?
+We solved the circuit by first finding its Thevenin equivalent.
+Explain the difference between Thevenin voltage and load voltage.
+The Thevenin resistance depends on the network seen from the terminals.
+How would you verify your Thevenin result experimentally?
+Please walk through the steps of this Thevenin calculation.
+We used the Thevenin model to predict the load current.
+What assumptions did you make when applying the Thevenin theorem?
+The Thevenin equivalent makes the final calculation much easier.
+I want to understand why this Thevenin model is valid.
+What are you studying at the University of Waterloo?
+Tell me about your engineering projects at Waterloo.
+How has your experience at Waterloo influenced your interests?
+I joined a robotics team while studying at Waterloo.
+Which Waterloo course helped you most with this project?
+Can you describe a technical challenge from your time at Waterloo?
+Our Waterloo team worked together on the final demonstration.
+What made you choose Waterloo for your education?
+How do you balance coursework and projects at Waterloo?
+I learned to debug complex systems through my work at Waterloo.
+Tell me about collaboration with other students at Waterloo.
+The Waterloo project required both hardware and software testing.
+What would you recommend to a new engineering student at Waterloo?
+We presented the prototype to our classmates at Waterloo.
+Which skills from Waterloo would help you in this role?
+Please describe a project that you enjoyed building at Waterloo.
+Why did you choose LangGraph for the voice agent?
+The LangGraph workflow routes questions through the retrieval tools.
+How does LangGraph track the state of a conversation?
+We added a guard node to the LangGraph pipeline.
+Tell me how you tested the LangGraph agent locally.
+What happens when a tool fails inside the LangGraph workflow?
+I used LangGraph to make the agent control flow explicit.
+Can you explain the conditional edges in your LangGraph application?
+The LangGraph state includes the messages from the conversation.
+How would you add another retrieval tool to LangGraph?
+We inspected the LangGraph trace to understand an incorrect answer.
+Explain how LangGraph connects retrieval and response generation.
+What tradeoffs did you consider when selecting LangGraph?
+The LangGraph agent checks facts before returning its answer.
+How do you prevent a loop from continuing forever in LangGraph?
+Please walk through one request handled by your LangGraph workflow.
+Could you explain the main goal of your project?
+How did you test the system before showing the demo?
+Tell me about a difficult bug that you fixed.
+What would you improve if you had another week?
+The application should show a helpful message when something fails.
+We measured response time before and after the change.
+How did you decide which feature to build first?
+Please explain the architecture without assuming I know the code.
+The training data needs a separate validation split.
+We kept the configuration in a small readable file.
+What did you learn from working with your teammates?
+The server handles incoming requests and returns a response.
+How do you know the model is making better predictions?
+We compared the new implementation against the original baseline.
+Tell me about a design decision you would make differently.
+The test should fail when the expected behavior changes.
+Can you give me an example of an unexpected edge case?
+We reviewed the logs to find the source of the problem.
+What part of the implementation are you most comfortable explaining?
+The user can interrupt the agent while it is speaking.
+How would you make this application easier to maintain?
+I separated data preparation from the model training code.
+The microphone records audio before the transcript is generated.
+What would happen if the input contained background noise?
+We used a small batch size to reduce memory usage.
+Please describe the steps from an input to a prediction.
+How did you evaluate whether the answer was accurate?
+The model should handle sentences it never saw during training.
+We saved the best checkpoint after comparing validation results.
+What would you monitor after deploying the application?
+The documentation explains how to reproduce the experiment.
+Could you summarize the most important lesson from this work?

@@ -1,0 +1,25 @@
+{
+  "base_model": "openai/whisper-small",
+  "device": "cpu",
+  "seed": 42,
+  "train_examples": 512,
+  "validation_examples": 32,
+  "best_validation_wer": 0.01020408163265306,
+  "epochs": [
+    {
+      "epoch": 1,
+      "train_loss": 0.43431733538454864,
+      "validation_wer": 0.02040816326530612
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.11981199659112463,
+      "validation_wer": 0.01020408163265306
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.07572141784385167,
+      "validation_wer": 0.01020408163265306
+    }
+  ]
+}

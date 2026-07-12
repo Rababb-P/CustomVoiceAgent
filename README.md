@@ -137,23 +137,27 @@ make redteam     # just the adversarial suite
 ```
 
 TTS works out of the box (`pip install -e ".[tts]"` — Kokoro runs on CPU). The
-ASR fine-tune needs no recordings, just a GPU for the training step:
+ASR fine-tune generates its audio locally; a GPU is recommended for larger runs:
 `make synth-asr` (generate + render the synthetic dataset, CPU-fine) →
 `make prepare-asr` → `make train-asr` → `make export-asr`. Until then the
 server falls back to stock whisper-small with hotword biasing automatically.
 
 For a step-by-step explanation of the forward pass, loss, backward pass,
 AdamW update, and LoRA shapes, read [Explaining the training loop](docs/ASR_TRAINING.md).
-The executed notebook records a prior GPU run; its saved weights and training
-dataset are not included in this checkout. Restore the adapter to `runs/asr/final/`
-before exporting, or prepare the dataset for a new training run.
+A newly trained [Whisper-small LoRA adapter](artifacts/asr/whisper-small-lora/README.md)
+is included in this repo, with measured results and training metadata. Download
+the ready-to-use int8 model from the [ASR release](https://github.com/Rababb-P/CustomVoiceAgent/releases/tag/asr-retrain-2026-09-17)
+and extract its `whisper-personal-ct2` folder into `models/`. The server then uses
+it automatically. The [reproduction guide](docs/ASR_RETRAINING.md) covers training
+and exporting from the included adapter. This recovery run has its own results;
+the executed notebook records a different, earlier GPU run.
 
 ## Status
 
 | Phase | State |
 |---|---|
 | 0 — Scaffolding, LLM wrapper, tooling | ✅ done |
-| 1 — ASR fine-tune pipeline | ✅ code complete; notebook records prior GPU training. Restore model artifacts or train locally to enable the fine-tuned model |
+| 1 — ASR fine-tune pipeline | ✅ trained adapter, int8 model release, and measured recovery-run evaluation available |
 | 2 — RAG over life corpus | ✅ done — corpus stubs need my real content |
 | 3 — LangGraph agent | ✅ done |
 | 4 — Guardrails | ✅ done — red-team suite committed |

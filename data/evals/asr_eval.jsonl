@@ -1,51 +1,64 @@
-{"audio_path": "data/audio/synth/wavs/034bd551d5_am_adam_1.0.wav", "transcript": "The WATonomous perception team meets twice a week to review detection regressions.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0f74372c4a_bf_isabella_1.0.wav", "transcript": "WATonomous competition season means the whole team basically lives in the bay.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/03fa7141f6_bf_isabella_1.0.wav", "transcript": "The trickiest part of WATonomous perception is objects the training set never saw.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/10fd31339b_bm_lewis_1.0.wav", "transcript": "Which WATonomous subsystem would you redesign from scratch if you had a month?", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/10f1df222a_bf_isabella_1.0.wav", "transcript": "Reparo won the five thousand dollar Reactiv prize at Hack Canada twenty twenty five.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0f3a0b2aee_bf_isabella_1.0.wav", "transcript": "How did you keep Reparo from recommending parts that were out of stock?", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0dabadba77_bm_lewis_1.0.wav", "transcript": "The YOLOv11 confidence threshold took a week of tuning to get right.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0629725d8b_bm_lewis_1.0.wav", "transcript": "What data augmentation actually moved the needle for your YOLOv11 fine tune?", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0eea77abac_af_sky_1.0.wav", "transcript": "The demo tonight runs YOLOv11 on the drone footage from last weekend.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/02f3b0e5ee_bf_isabella_1.0.wav", "transcript": "You can watch YOLOv11 confidence drop the moment the lens fogs up.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0dfa6f9322_bf_isabella_1.0.wav", "transcript": "ROS2 topics make it easy to record a drive and replay it for debugging.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/002f29c479_am_adam_1.0.wav", "transcript": "Our ROS2 bag files from one test drive can hit fifty gigabytes.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0225ade0d8_af_sky_1.0.wav", "transcript": "Heads up, that ROS2 subscriber has a queue size of one so it drops frames.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/04d1736bb4_af_sky_1.0.wav", "transcript": "Learning ROS2 properly was the single best investment I made for robotics work.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0ca4702a3f_bm_lewis_1.0.wav", "transcript": "Every subsystem boundary on the vehicle is a ROS2 topic you can inspect.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0c43a04a75_am_adam_1.0.wav", "transcript": "My first ROS2 bug was a transform published in the wrong coordinate frame.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/11ef96a5a4_af_sky_1.0.wav", "transcript": "The cluster runs Slurm so everyone shares GPUs without stepping on each other.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/125a89d7ec_af_sky_1.0.wav", "transcript": "The lab this week has us measure a Thevenin equivalent experimentally.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/12e595dad6_bf_isabella_1.0.wav", "transcript": "Watch how the Thevenin simplification turns six components into two.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/1128b99ef8_af_sky_1.0.wav", "transcript": "I met my entire hackathon team in a Waterloo first year lab section.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0df44c92b6_bf_isabella_1.0.wav", "transcript": "The LangGraph checkpointer gives every conversation thread its own memory.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0cd534a83b_bm_lewis_1.0.wav", "transcript": "ROS2 experience from WATonomous transferred directly into my drone team work at Waterloo.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/06ec2a3132_bf_isabella_1.0.wav", "transcript": "LangGraph guards my voice agent the way watchdogs guard a ROS2 stack.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0e4231ef79_am_adam_1.0.wav", "transcript": "This capability enhances user interaction and broadens application functionalities by allowing more intuitive responses based on varied communication forms.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/1275b0d2cb_bm_lewis_1.0.wav", "transcript": "By systematically reviewing these notes alongside projects in VS Code, a more profound understanding can develop over time.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/1276293d27_bm_lewis_1.0.wav", "transcript": "During my last sprint, I handled a few tricky deployments where updates were made almost instantaneously because of that flexibility with serverless setups.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/08398c5e4e_bf_isabella_1.0.wav", "transcript": "First, I checked the connection string to ensure it pointed to the right MongoDB instance.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0de3abb02e_bf_isabella_1.0.wav", "transcript": "After validating the YAML syntax, I noticed it didn't align with our API structure.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0bb86c24b1_am_adam_1.0.wav", "transcript": "It enables efficient data serialization with a structure that mirrors traditional objects, allowing for seamless integration with JavaScript.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0071cd0e0b_bm_lewis_1.0.wav", "transcript": "While integrating the new speech processing module, I encountered challenges related to ASR performance.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/101abfd791_am_adam_1.0.wav", "transcript": "After completing my functions, I pushed them to our serverless environment, making sure that each deployment scaled seamlessly as users engaged with the app.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0b453aad08_af_sky_1.0.wav", "transcript": "Furthermore, mastering signals and slots within PyQt enhances interactivity significantly, improving user experiences tremendously in your applications.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0f904cf733_bm_lewis_1.0.wav", "transcript": "It\u2019s crucial because any misconfiguration with the DNS on Cloudflare can lead to downtime.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0c65ac07b2_bf_isabella_1.0.wav", "transcript": "Hugging Face is a leading platform in natural language processing that offers robust pre-trained models and easy-to-use APIs.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0b41b93bca_bf_isabella_1.0.wav", "transcript": "I restarted that daemon and reviewed its configuration to ensure everything was correct.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/036dc8f590_af_sky_1.0.wav", "transcript": "First, I set up the domain on Cloudflare and updated my DNS records accordingly.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/072a4ffe56_bf_isabella_1.0.wav", "transcript": "So, when I set up our monitoring system, I integrated Prometheus to collect metrics from our various services.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/075ff19310_af_sky_1.0.wav", "transcript": "Once that was resolved, I also monitored system performance after adding another cron instance for log rotation\u2014ensuring minimal resource impact during peak hours.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0ef4656fc0_af_sky_1.0.wav", "transcript": "Consequently, users experience faster image rendering, enhancing overall performance and making a noticeable difference in user experience with webp's superior compression capabilities.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0d3067bf05_am_adam_1.0.wav", "transcript": "In working with responsive design, I realized we needed to leverage SVG for scalable graphics.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/09eeb2b9d7_bm_lewis_1.0.wav", "transcript": "Subsequently, I reviewed our current library to ensure all imported SVG files were correctly integrated within the application structure.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/079ac3caea_bf_isabella_1.0.wav", "transcript": "In my recent work with Kubernetes, I encountered challenges while managing deployments.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/01397499f2_bf_isabella_1.0.wav", "transcript": "By implementing Helm charts, I could easily manage application lifecycles and configuration settings.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/07de6d0980_af_sky_1.0.wav", "transcript": "Ultimately, using Helm transformed how our team approached package management within the cluster ecosystem.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/06e73ef277_bm_lewis_1.0.wav", "transcript": "As I was configuring our application, I realized that I needed to manage environment variables more efficiently.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0139473fa6_bf_isabella_1.0.wav", "transcript": "Ultimately, dotenv simplified our deployment process significantly.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0c3ce469e7_bm_lewis_1.0.wav", "transcript": "Furthermore, integrating caching strategies with Django proved essential for enhancing application scalability.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0ef3d69d12_bf_isabella_1.0.wav", "transcript": "It is fascinating how customizing an IDE can elevate overall productivity during development tasks.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/057cad4e58_af_sky_1.0.wav", "transcript": "While reviewing the rendering performance, I noticed that optimizing proxy settings within Kdenlive significantly accelerated playback for high-resolution edits.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/00fbc64007_bm_lewis_1.0.wav", "transcript": "Eventually, these enhancements made a significant impact on user experience across all applications running in the KDE Plasma environment.", "source": "synth_heldout"}
-{"audio_path": "data/audio/synth/wavs/0585266b4f_bm_lewis_1.0.wav", "transcript": "Additionally, maintaining a record of these SSH keys allows for easier management and auditing of user access over time.", "source": "synth_heldout"}
+{"audio_path": "data/audio/retrain/synth/wavs/0cd2378ab6_bf_isabella_1.0.wav", "transcript": "My work with WATonomous involved testing the perception pipeline.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/1c81d6b20e_bf_isabella_1.0.wav", "transcript": "Our WATonomous demo showed the perception system running live.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/25e3c41c6b_bm_lewis_1.0.wav", "transcript": "What problem were you trying to solve with Reparo?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/11e1f99296_bf_isabella_1.0.wav", "transcript": "We compared the YOLOv11 outputs with our validation labels.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/21e03a553d_am_adam_1.0.wav", "transcript": "We inspected the YOLOv11 confidence threshold during testing.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/0ab9cde8d9_am_adam_1.0.wav", "transcript": "The camera publishes image messages on a ROS2 topic.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/07831ab37b_bm_lewis_1.0.wav", "transcript": "We used ROS2 nodes to separate perception from control.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/24ca121668_af_sky_1.0.wav", "transcript": "Tell me how you debugged communication between ROS2 nodes.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/208232e6e7_bm_lewis_1.0.wav", "transcript": "Our ROS2 integration needed consistent timestamps from the sensors.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/0570085a92_bf_isabella_1.0.wav", "transcript": "Can you describe the role of a ROS2 service?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/13b46ab95f_bm_lewis_1.0.wav", "transcript": "We tested the ROS2 pipeline before connecting the hardware.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/067dafcac7_bm_lewis_1.0.wav", "transcript": "I want to understand how ROS2 handles asynchronous data.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/0b88a221af_bm_lewis_1.0.wav", "transcript": "Tell me how you monitored a long running Slurm job.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/1bbe21b311_am_adam_1.0.wav", "transcript": "The Slurm output file contained the final training metrics.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/1eb43e4dbc_af_sky_1.0.wav", "transcript": "We calculated the Thevenin voltage across the open terminals.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/064691cb13_bm_lewis_1.0.wav", "transcript": "I checked the Thevenin calculation against the original circuit.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/23abbf58e1_am_adam_1.0.wav", "transcript": "We solved the circuit by first finding its Thevenin equivalent.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/224e73df65_am_adam_1.0.wav", "transcript": "The Thevenin resistance depends on the network seen from the terminals.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/02a06f6c47_bm_lewis_1.0.wav", "transcript": "Please walk through the steps of this Thevenin calculation.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/0dffee0ae8_af_sky_1.0.wav", "transcript": "The Thevenin equivalent makes the final calculation much easier.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/0634bd632a_bf_isabella_1.0.wav", "transcript": "What are you studying at the University of Waterloo?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/19fe1837b4_af_sky_1.0.wav", "transcript": "I joined a robotics team while studying at Waterloo.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/21b7153d88_af_sky_1.0.wav", "transcript": "How do you balance coursework and projects at Waterloo?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/0f4c36fa0a_bf_isabella_1.0.wav", "transcript": "I learned to debug complex systems through my work at Waterloo.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/05da491e93_bm_lewis_1.0.wav", "transcript": "Tell me about collaboration with other students at Waterloo.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/11c99bfe1d_am_adam_1.0.wav", "transcript": "The Waterloo project required both hardware and software testing.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/14e3015aa9_am_adam_1.0.wav", "transcript": "The LangGraph agent checks facts before returning its answer.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/021ba9f353_bm_lewis_1.0.wav", "transcript": "What would you improve if you had another week?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/2230dab5a4_af_sky_1.0.wav", "transcript": "How did you decide which feature to build first?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/03a9fa70aa_bf_isabella_1.0.wav", "transcript": "The user can interrupt the agent while it is speaking.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/1dbf78d3cd_am_adam_1.0.wav", "transcript": "We used a small batch size to reduce memory usage.", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/synth/wavs/13969e79d2_bf_isabella_1.0.wav", "transcript": "What would you monitor after deploying the application?", "source": "synthetic_validation"}
+{"audio_path": "data/audio/retrain/processed/real_test/000.wav", "transcript": "Joe Keaton disapproved of films, and Buster also had reservations about the medium.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/001.wav", "transcript": "She'll be all right.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/002.wav", "transcript": "Six", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/003.wav", "transcript": "All's well that ends well.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/004.wav", "transcript": "It is a busy market town that serves a large surrounding area.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/005.wav", "transcript": "We are going to the football game tonight.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/006.wav", "transcript": "Elizabeth was about the same age as Maria.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/007.wav", "transcript": "Do you mean it?", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/008.wav", "transcript": "How is Mozilla going to handle ambiguities like Queue and Cue?", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/009.wav", "transcript": "You are so rude!", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/010.wav", "transcript": "I guess you must think I'm kinda Batty.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/011.wav", "transcript": "No one near the remote machine you could ring?", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/012.wav", "transcript": "Groves started writing songs when she was four years old.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/013.wav", "transcript": "This led to both the Red terror and the White terror.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/014.wav", "transcript": "The Sacramento valley rail station is just a short walk away.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/015.wav", "transcript": "The most recent Presidents of the United States are Donald Trump, Barack Obama, and George W. Bush.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/016.wav", "transcript": "There was nothing to hold him back except himself.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/017.wav", "transcript": "These locomotives are serviced at Washwood Heath.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/018.wav", "transcript": "It might be in this writer's top ten!", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/019.wav", "transcript": "We spoke often.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/020.wav", "transcript": "Mrs. Lewis was selected as the new Commissioner.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/021.wav", "transcript": "The Electrician looked puzzled.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/022.wav", "transcript": "The ladder on the fire truck was not long enough.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/023.wav", "transcript": "I will tell her what we decided.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/024.wav", "transcript": "Enoxaparin belongs to the class of drugs known as low molecular weight Heparins.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/025.wav", "transcript": "I guess, it's a Never-Ending story.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/026.wav", "transcript": "Good things come in small packages.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/027.wav", "transcript": "It is a member theater of the Union of the theatres of Europe.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/028.wav", "transcript": "I like apples, pears, and Pomegranate, but I do like strawberries or grapes.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/029.wav", "transcript": "You wanNA take this outside?", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/030.wav", "transcript": "The immersion in hot water also kills the Silkworm Pupa.", "source": "common_voice_test"}
+{"audio_path": "data/audio/retrain/processed/real_test/031.wav", "transcript": "She married her business partner, Steve Lane.", "source": "common_voice_test"}

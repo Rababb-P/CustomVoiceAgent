@@ -1,0 +1,18 @@
+{
+  "train": {
+    "examples": 512,
+    "duration_seconds": 2595.083,
+    "min_seconds": 1.656,
+    "max_seconds": 10.296,
+    "invalid_rows": []
+  },
+  "validation": {
+    "examples": 32,
+    "duration_seconds": 137.375,
+    "min_seconds": 3.3,
+    "max_seconds": 5.8,
+    "invalid_rows": []
+  },
+  "source_sentences_sha256": "26f9597b1cb758df51fe9a2b15f2b82ede61da5a03c694db10ba38e9a100eee2",
+  "config_sha256": "32652c7e28b964ea225abeee6a7a7113baa17dc7f6504147423bdf40d95007ad"
+}

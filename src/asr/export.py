@@ -14,13 +14,20 @@ from src.config import load_config
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/asr_finetune.yaml")
+    parser.add_argument(
+        "--adapter-dir", help="load a downloaded adapter instead of training final/"
+    )
     args = parser.parse_args()
     cfg = load_config(args.config)
 
     from peft import PeftModel
     from transformers import WhisperForConditionalGeneration, WhisperProcessor
 
-    adapter_dir = Path(cfg["training"]["output_dir"]) / "final"
+    adapter_dir = (
+        Path(args.adapter_dir)
+        if args.adapter_dir
+        else Path(cfg["training"]["output_dir"]) / "final"
+    )
     merged_dir = Path(cfg["export"]["merged_dir"])
     ct2_dir = Path(cfg["export"]["ct2_dir"])
 
@@ -33,10 +40,18 @@ def main() -> None:
     # Module form of ct2-transformers-converter: findable without venv activation.
     subprocess.run(
         [
-            sys.executable, "-m", "ctranslate2.converters.transformers",
-            "--model", str(merged_dir),
-            "--output_dir", str(ct2_dir),
-            "--quantization", cfg["export"]["quantization"],
+            sys.executable,
+            "-m",
+            "ctranslate2.converters.transformers",
+            "--model",
+            str(merged_dir),
+            "--output_dir",
+            str(ct2_dir),
+            "--quantization",
+            cfg["export"]["quantization"],
+            "--copy_files",
+            "tokenizer.json",
+            "preprocessor_config.json",
             "--force",
         ],
         check=True,

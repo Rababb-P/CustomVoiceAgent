@@ -12,6 +12,7 @@ Start with train_one_epoch below; docs/ASR_TRAINING.md maps it to the math.
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,6 +20,17 @@ from pathlib import Path
 from src.config import load_config
 
 logger = logging.getLogger(__name__)
+
+
+def load_processor(base: str, language: str, task: str):
+    """Configure both tokenizer attributes and its fast-tokenizer prefix template."""
+    from transformers import WhisperProcessor
+
+    processor = WhisperProcessor.from_pretrained(base, language=language, task=task)
+    # Some versions set the attributes without rebuilding the fast backend's
+    # template. An explicit call ensures labels contain language + task tokens.
+    processor.tokenizer.set_prefix_tokens(language=language, task=task, predict_timestamps=False)
+    return processor
 
 
 @dataclass
@@ -94,6 +106,8 @@ def train_one_epoch(
             outputs = model(input_features=features, labels=labels)  # Forward pass.
             loss = outputs.loss  # Token cross-entropy, computed by Whisper.
         total_loss += loss.detach().item()
+        if (i + 1) % 25 == 0 or i + 1 == len(loader):
+            logger.info("batch %d/%d  mean loss %.4f", i + 1, len(loader), total_loss / (i + 1))
         loss = loss / group_size
 
         if use_amp:
@@ -163,7 +177,7 @@ def main() -> None:
     from peft import LoraConfig, get_peft_model
     from torch.utils.data import DataLoader
     from torch.utils.tensorboard import SummaryWriter
-    from transformers import WhisperForConditionalGeneration, WhisperProcessor
+    from transformers import WhisperForConditionalGeneration
 
     t = cfg["training"]
     out_dir = Path(args.output_dir or t["output_dir"])
@@ -174,13 +188,14 @@ def main() -> None:
 
     # ---- model + LoRA -------------------------------------------------------
     base = cfg["model"]["base"]
-    processor = WhisperProcessor.from_pretrained(
-        base, language=cfg["model"]["language"], task=cfg["model"]["task"]
-    )
+    processor = load_processor(base, language=cfg["model"]["language"], task=cfg["model"]["task"])
     model = WhisperForConditionalGeneration.from_pretrained(base)
     decoder_start_token_id = model.config.decoder_start_token_id
     model.config.forced_decoder_ids = None
     model.config.suppress_tokens = []
+    model.generation_config.language = cfg["model"]["language"]
+    model.generation_config.task = cfg["model"]["task"]
+    model.generation_config.forced_decoder_ids = None
 
     lora = cfg["lora"]
     # PEFT freezes the base weights W and adds trainable A and B to q_proj/v_proj.
@@ -212,6 +227,9 @@ def main() -> None:
         return batch
 
     ds = ds.map(preprocess, remove_columns=ds["train"].column_names, num_proc=1)
+    prefix = processor.tokenizer.prefix_tokens
+    if ds["train"][0]["labels"][: len(prefix)] != prefix:
+        raise ValueError("Training labels are missing the configured language/task prefix")
     ds.set_format("torch", columns=["input_features", "labels"], output_all_columns=True)
 
     collate = Collator(processor, decoder_start_token_id)
@@ -239,6 +257,7 @@ def main() -> None:
     # ---- the loop ------------------------------------------------------------
     final_dir = out_dir / "final"
     best_wer = float("inf")
+    history = []
     for epoch in range(1, epochs + 1):
         loss = train_one_epoch(
             model,
@@ -262,6 +281,22 @@ def main() -> None:
             model.save_pretrained(str(final_dir))
             processor.save_pretrained(str(final_dir))
             logger.info("new best (WER %.4f) -> %s", wer, final_dir)
+        history.append({"epoch": epoch, "train_loss": loss, "validation_wer": wer})
+        (out_dir / "training_metrics.json").write_text(
+            json.dumps(
+                {
+                    "base_model": base,
+                    "device": device,
+                    "seed": t.get("seed", 42),
+                    "train_examples": len(ds["train"]),
+                    "validation_examples": len(ds["validation"]),
+                    "best_validation_wer": best_wer,
+                    "epochs": history,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
 
     writer.close()
     print(f"Saved best LoRA adapter (WER {best_wer:.4f}) to {final_dir}. Next: make export-asr")

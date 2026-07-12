@@ -4,9 +4,35 @@ from types import SimpleNamespace
 
 import pytest
 
-from src.asr.train import Collator, lr_lambda_linear, train_one_epoch
+from src.asr.train import Collator, load_processor, lr_lambda_linear, train_one_epoch
 
 torch = pytest.importorskip("torch")
+
+
+def test_loaded_fast_tokenizer_encodes_language_and_task_prefix(tmp_path):
+    transformers = pytest.importorskip("transformers")
+    tokenizers = pytest.importorskip("tokenizers")
+    vocab = {
+        "<|endoftext|>": 0,
+        "<|startoftranscript|>": 1,
+        "<|en|>": 2,
+        "<|translate|>": 3,
+        "<|transcribe|>": 4,
+        "<|notimestamps|>": 5,
+        "hello": 6,
+    }
+    backend = tokenizers.Tokenizer(tokenizers.models.WordLevel(vocab, unk_token="<|endoftext|>"))
+    tokenizer = transformers.WhisperTokenizerFast(
+        tokenizer_object=backend,
+        additional_special_tokens=list(vocab)[:6],
+    )
+    transformers.WhisperProcessor(
+        transformers.WhisperFeatureExtractor(), tokenizer
+    ).save_pretrained(tmp_path)
+    loaded = load_processor(str(tmp_path), "en", "transcribe")
+    # Inspect actual encoded IDs, not just prefix_tokens: the fast backend can
+    # have a stale template even when the public attributes look correct.
+    assert loaded.tokenizer("hello").input_ids == [1, 2, 4, 5, 6, 0]
 
 
 class ScalarModel(torch.nn.Module):
