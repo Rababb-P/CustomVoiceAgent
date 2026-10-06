@@ -1,170 +1,177 @@
-# Voice Persona Agent v2 — "AI Rababb"
+# AI Rababb ? Voice Persona Agent
 
-A voice-to-voice AI that answers questions about me, as me — grounded in my
-actual resume and project history, and unable to make things up.
+A voice assistant that answers questions about Rababb Pannu's projects and experience using a Markdown knowledge base. It combines **Whisper speech recognition**, **retrieval with Chroma**, a **LangGraph agent**, and **local Kokoro speech synthesis**.
 
-Speak into a mic; a Whisper model **fine-tuned on synthetic multi-voice data for
-my domain vocabulary** transcribes it, a **LangGraph agent** retrieves facts
-from a personal corpus via RAG, layered
-**guardrails** block prompt injection and hallucinated claims, and a **fully
-local TTS engine** speaks the answer back. Total API cost: **$0** — everything
-runs locally except the LLM, which rides the Gemini free tier behind a
-rate-limited, disk-cached client I wrote to make that survivable.
+[Watch the recorded demo](https://drive.google.com/file/d/1Ib6TnhytXvJMXDUZB3i1y0RpPs3Oo22P/view) ? [ASR model release](https://github.com/Rababb-P/CustomVoiceAgent/releases/tag/asr-retrain-2026-09-17) ? [Training walkthrough](docs/ASR_TRAINING.md)
 
-## Demo
+## Try it
 
-▶ **[Watch the demo](airababbreparovid.mp4)** — mic → fine-tuned Whisper → guarded agent → Kokoro voice, end to end.
+**No installation:** [watch the existing recording](https://drive.google.com/file/d/1Ib6TnhytXvJMXDUZB3i1y0RpPs3Oo22P/view). The video is approximately 58 MB. A browser showcase is prepared in [docs/index.html](docs/index.html); it is not yet published as a hosted site.
 
-https://github.com/Rababb-P/CustomVoiceAgent/raw/main/airababbreparovid.mp4
+**Interactive:** run the text agent or browser voice interface locally using the instructions below. The app needs a Gemini API key; speech recognition, embeddings, and speech synthesis run on the application host. There is currently no public interactive endpoint.
 
+Example questions:
+
+- ?What did you build at Hack Canada??
+- ?How did you use computer vision in Smart Bin??
+- ?Tell me about your WATonomous work.?
+
+## How it works
+
+```mermaid
+flowchart LR
+    Mic[Browser microphone] --> VAD[Voice activity detection]
+    VAD --> ASR[Whisper / faster-whisper]
+    ASR --> Input[Input guard]
+    Input --> Agent[LangGraph + Gemini]
+    Agent <--> RAG[Chroma + local embeddings]
+    Agent --> Output[Output checks]
+    Output --> TTS[Sentence chunks + Kokoro]
+    TTS --> Speaker[Browser speaker]
 ```
- mic audio ──► VAD ──► fine-tuned Whisper ──► input guard ──► LangGraph agent ◄──► RAG tools
- (browser)  (silero)   (LoRA + CTranslate2)   (heuristics +        │                (Chroma +
-                                               flash-lite)         ▼                 bge-small)
- speaker ◄──── local TTS ◄────── sentence chunker ◄── output guard (PII regex +
-             (Kokoro, on-CPU;    (streams while LLM     groundedness judge)
-              cloning optional)   still generating)
-```
 
-## Why this project is interesting (the 60-second tour)
+The agent retrieves supporting passages from `data/corpus/`, calls tools, and applies input and output checks. The non-streaming `/ask` route includes a groundedness judge and one regeneration attempt. The streaming `/converse` route disables that judge and checks each spoken sentence for PII patterns to reduce latency. These checks reduce unsupported responses; they do not guarantee factual accuracy or resistance to every attack.
 
-**1. Custom ASR, not an API call.** Base Whisper mangles my domain vocabulary —
-"WATonomous", "Reparo", "YOLOv11" — which poisons retrieval before the agent
-even starts. No public dataset contains those words, so I *generate* one:
-LLM-written sentences using the vocab, rendered by a dozen different local TTS
-voices with speed/noise augmentation, mixed with real human tech speech
-([TechVoice](https://huggingface.co/datasets/danielrosehill/TechVoice), MIT) and
-Common Voice so it generalizes past TTS artifacts and doesn't forget English.
-Then `whisper-small` is fine-tuned with LoRA (PEFT, r=32 on attention
-projections), merged, and exported to CTranslate2 for real-time inference. The
-eval is honest: validation uses *held-out sentences spoken by held-out voices*,
-plus real held-out TechVoice audio, and the fine-tune must beat not just base
-Whisper but **base + hotword biasing** (the cheap trick, also implemented) to
-justify existing. ([src/asr/](src/asr/))
+## Quick start
 
-**2. The agent can't hallucinate my life.** It's not a stuffed prompt — it's a
-LangGraph state machine where retrieval is a tool call and *guards are graph
-nodes*. Every factual claim in an answer must be supported by chunks retrieved
-that turn; a flash-lite judge checks this, gives the model one regeneration
-attempt with the violation as feedback, then falls back to an honest "not
-sure". A PII denylist (regex + judge) hard-blocks addresses, IDs, and anything
-about third parties, no matter what's asked. ([src/agent/graph.py](src/agent/graph.py),
-[src/guardrails/](src/guardrails/))
+### 1. Install
 
-**3. Every change is gated by evals.** `make eval` scores four suites — ASR
-WER, retrieval recall@6/MRR, LLM-as-judge answer quality (judge sees gold
-*facts*, never gold answers), and a 30-case red-team suite — writes a
-timestamped report, and diffs it against the last run. `make eval-ci` exits
-non-zero if WER rises >5% relative, recall drops below 0.85, judge scores drop
->0.3, or injection/PII pass rate dips below 100%. ([evals/](evals/))
-
-**4. Free-tier quota as an engineering constraint.** Gemini's free tier is
-~10 requests/min and ~250/day. Every LLM call goes through one wrapper
-([src/llm.py](src/llm.py)): client-side sliding-window RPM limiter, exponential
-backoff, and an on-disk cache keyed by (model, prompt hash) — so eval reruns
-cost zero quota. Cheap classification (guards, judges) runs on `flash-lite`,
-which has higher limits; only the agent itself uses `flash`.
-
-**5. Latency is a feature.** The token stream is cut at sentence boundaries
-([src/tts/chunker.py](src/tts/chunker.py)) and each sentence is synthesized
-while the LLM is still generating, so first audio plays early. Per-stage
-timings (VAD, ASR, agent, first-audio) are logged every turn, and
-`make bench-tts` benchmarks the TTS engines on the current machine. Kokoro is
-the default — fast and CPU-friendly; Chatterbox voice cloning stays available
-behind a config flag if I ever want it to sound like me.
-
-## Repo tour
-
-| Path | What it is |
-|---|---|
-| [src/llm.py](src/llm.py) | Shared Gemini client: RPM limiter, backoff, disk cache |
-| [src/asr/](src/asr/) | Whisper LoRA fine-tune: synth data gen → train → CT2 export → transcribe |
-| [src/rag/](src/rag/) | Markdown corpus → header-aware chunks → bge-small embeddings → Chroma |
-| [src/agent/](src/agent/) | LangGraph graph, tools (`search_life_info`, `list_topics`, `clarify`), persona |
-| [src/guardrails/](src/guardrails/) | Input guard, output guard (groundedness + PII), policy allow/denylists |
-| [src/tts/](src/tts/) | Kokoro TTS (default) + optional Chatterbox clone behind one async interface |
-| [src/server/](src/server/) | FastAPI WebSocket `/converse` (audio↔audio) + `POST /ask`, silero VAD |
-| [notebooks/](notebooks/) | The raw-PyTorch LoRA training loop, narrated cell-by-cell with a runnable demo |
-| [evals/](evals/) | Four eval suites + [report.py](evals/report.py) aggregator with the regression gate |
-| [tests/](tests/) | 42 unit tests — graph runs on a fake chat model: no API key, no quota |
-| [data/README.md](data/README.md) | Corpus format + eval JSONL schemas (audio/corpus never committed) |
-| [docs/PLAN.md](docs/PLAN.md) | The full phase-by-phase build plan this repo follows |
-
-## Design decisions worth asking me about
-
-- **Guards as graph nodes, not middleware.** Refusals route straight to END via
-  conditional edges — an injected prompt never touches the main model or the
-  corpus. The graph is the security boundary, and it's unit-testable with fakes.
-- **The judge sees gold facts, never gold answers.** Scoring against a
-  reference answer rewards parroting; scoring claims against facts measures
-  what I actually care about — faithfulness.
-- **Streaming vs. groundedness tradeoff.** The groundedness judge needs the
-  full answer, so the streaming voice path runs the fast local PII gate per
-  sentence, while the full judge stack runs on `POST /ask` and in evals. Chosen
-  deliberately: latency for conversation, strictness where it's measured.
-- **Synthetic ASR data over recording myself.** The people talking to the demo
-  are interviewers, not me — so a your-voice-only fine-tune adapts to the wrong
-  speakers. Multi-voice synthetic audio teaches the *vocabulary* in a way that
-  transfers to anyone, transcripts are perfect by construction, and the
-  held-out-voices eval proves it isn't memorizing TTS quirks.
-- **LoRA + CTranslate2 instead of full fine-tune.** Adapter training fits a
-  consumer GPU; merging + int8 CT2 export means inference is identical in cost
-  to stock faster-whisper.
-- **Boring wrappers.** Chroma is hidden behind [store.py](src/rag/store.py),
-  both TTS engines behind one interface, all LLM calls behind
-  [llm.py](src/llm.py) — every vendor choice is swappable.
-
-## Running it
+Use **Python 3.11+** and run commands from the repository root.
 
 ```bash
-# 1. Install (Python 3.11+). uv works too: uv sync --extra dev --extra rag
-make setup
-
-# 2. Configure
-cp .env.example .env        # add your free GOOGLE_API_KEY (aistudio.google.com/apikey)
-
-# 3. Write the corpus (markdown in data/corpus/ — stubs are generated) and index it
-make ingest
-
-# 4. Talk to it
-python -m src.agent.graph "what did you build at hack canada" -v   # text, with node trace
-make serve                                                          # then open http://localhost:8000
-
-# Quality gates
-make test        # unit tests (no API key needed)
-make eval        # all suites, prints comparison vs last run
-make redteam     # just the adversarial suite
+git clone https://github.com/Rababb-P/CustomVoiceAgent.git
+cd CustomVoiceAgent
+python -m venv .venv
 ```
 
-TTS works out of the box (`pip install -e ".[tts]"` — Kokoro runs on CPU). The
-ASR fine-tune generates its audio locally; a GPU is recommended for larger runs:
-`make synth-asr` (generate + render the synthetic dataset, CPU-fine) →
-`make prepare-asr` → `make train-asr` → `make export-asr`. Until then the
-server falls back to stock whisper-small with hotword biasing automatically.
+Activate the environment:
 
-For a step-by-step explanation of the forward pass, loss, backward pass,
-AdamW update, and LoRA shapes, read [Explaining the training loop](docs/ASR_TRAINING.md).
-A newly trained [Whisper-small LoRA adapter](artifacts/asr/whisper-small-lora/README.md)
-is included in this repo, with measured results and training metadata. Download
-the ready-to-use int8 model from the [ASR release](https://github.com/Rababb-P/CustomVoiceAgent/releases/tag/asr-retrain-2026-09-17)
-and extract its `whisper-personal-ct2` folder into `models/`. The server then uses
-it automatically. The [reproduction guide](docs/ASR_RETRAINING.md) covers training
-and exporting from the included adapter. This recovery run has its own results;
-the executed notebook records a different, earlier GPU run.
+| Platform | Command |
+| --- | --- |
+| Windows PowerShell | `.venv\Scripts\Activate.ps1` |
+| macOS / Linux | `source .venv/bin/activate` |
 
-## Status
+For the text agent:
 
-| Phase | State |
-|---|---|
-| 0 — Scaffolding, LLM wrapper, tooling | ✅ done |
-| 1 — ASR fine-tune pipeline | ✅ trained adapter, int8 model release, and measured recovery-run evaluation available |
-| 2 — RAG over life corpus | ✅ done — corpus stubs need my real content |
-| 3 — LangGraph agent | ✅ done |
-| 4 — Guardrails | ✅ done — red-team suite committed |
-| 5 — Eval harness + regression gate | ✅ done |
-| 6 — Voice loop (TTS, VAD, WebSocket server) | ✅ done — Kokoro voice by default; cloning and barge-in are flagged extras |
+```bash
+python -m pip install -e ".[rag]"
+```
 
-Privacy note: recordings, the personal corpus, and the vector index are
-gitignored and never leave my machine. The only cloud dependency is the Gemini
-free tier, and nothing private goes into it by policy
-([src/guardrails/policy.py](src/guardrails/policy.py)).
+For the browser voice interface, install the speech dependencies as well:
+
+```bash
+python -m pip install -e ".[rag,asr,tts]"
+```
+
+The voice extras also include training libraries. Initial setup downloads model weights, so allow time and disk space. GPU acceleration is optional for inference; performance depends on your machine. If Kokoro reports a missing phonemizer/system dependency, follow the instructions in its error message for your operating system.
+
+### 2. Configure
+
+Copy `.env.example` to `.env` (`Copy-Item .env.example .env` in PowerShell; `cp .env.example .env` on macOS/Linux) and set:
+
+```dotenv
+GOOGLE_API_KEY=your-key-here
+```
+
+Keep the key in `.env`, which is ignored by Git. Model names and client-side request limits live in [configs/agent.yaml](configs/agent.yaml). Verify that the configured models are available to your account; free-tier eligibility and provider limits can change. Changing the commented model environment variables in `.env.example` does **not** override the current YAML loader.
+
+### 3. Index the knowledge base
+
+The repository already contains public profile and project documents. Review them, or replace them with facts about your own persona, before indexing:
+
+```bash
+python -m src.rag.ingest --config configs/rag.yaml
+```
+
+This builds the local Chroma index and downloads the embedding model on first use. Rerun ingestion after changing the corpus.
+
+### 4. Ask a question
+
+```bash
+python -m src.agent.graph "What did you build at Hack Canada?"
+```
+
+Add `-v` for graph and tool traces.
+
+For voice conversations:
+
+```bash
+python -m uvicorn src.server.app:app --host 127.0.0.1 --port 8000
+```
+
+Open **http://localhost:8000**, allow microphone access, and hold the button or spacebar to speak. The server falls back to base Whisper-small with vocabulary hotwords when the fine-tuned model is absent. If TTS initialization fails, the server can return text, but ASR still needs to load successfully.
+
+### 5. Use the fine-tuned speech model (optional)
+
+Download the int8 CTranslate2 ZIP from the [ASR release](https://github.com/Rababb-P/CustomVoiceAgent/releases/tag/asr-retrain-2026-09-17) and extract it so this directory exists:
+
+```text
+models/whisper-personal-ct2/
+```
+
+Restart the server. It selects that directory automatically. The repository also includes the smaller [LoRA adapter and model card](artifacts/asr/whisper-small-lora/README.md); loading the adapter separately requires the base Whisper model.
+
+## Measured ASR results
+
+The committed recovery-run evaluation compares int8 exported models with matched decoding settings. **Lower normalized word error rate (WER) is better.**
+
+| Model | Synthetic validation WER | Real-speech test WER |
+| --- | ---: | ---: |
+| Whisper-small | 5.78% | 21.89% |
+| Whisper-small + hotwords | 2.04% | **21.13%** |
+| Fine-tuned Whisper-small | **1.02%** | 21.51% |
+
+The fine-tune improves the domain-focused synthetic set; it does not beat hotword biasing on this real-speech test. Each evaluation slice has only 32 examples, and synthetic validation was used to select the checkpoint. These results are not a broad accuracy estimate. See the [model card](artifacts/asr/whisper-small-lora/README.md) and [evaluation data](artifacts/asr/whisper-small-lora/evaluation.json).
+
+The recovery run used 512 training examples and three epochs, selecting epoch two. The [executed notebook](notebooks/asr_finetune_pytorch.ipynb) documents an earlier GPU run, with different results.
+
+## Engineering details
+
+- **Domain ASR:** synthetic speech, real-speech mixing, Whisper LoRA training, hotword baseline, and CTranslate2 export.
+- **Retrieval:** Markdown header-aware chunks, local `BAAI/bge-small-en-v1.5` embeddings, source metadata, and Chroma persistence.
+- **Agent:** retrieval and clarification tools, bounded tool iteration, and graph-based guard decisions.
+- **LLM wrapper:** per-model request limiting, retries, and disk caching for supported non-streaming calls. Streaming responses are not cached by LangChain.
+- **Voice transport:** 16 kHz mono PCM16 microphone input over WebSockets; sentence-level synthesis and PCM16 playback.
+- **Evaluation:** ASR WER, retrieval recall/MRR, answer judging, adversarial fixtures, and an explicit regression-gate command.
+
+## Tests and evaluation
+
+```bash
+python -m pip install -e ".[dev,rag]"
+python -m pytest -q
+```
+
+Unit tests use fakes where appropriate and do not require a live API key. Full evaluations have additional data/model requirements, and agent/judge suites use Gemini:
+
+```bash
+python -m evals.report
+python -m evals.report --ci
+python -m evals.run_redteam
+```
+
+`--ci` applies the implemented regression thresholds; this repository does not currently contain a GitHub Actions workflow that automatically runs that gate. See [data/README.md](data/README.md) for fixture formats. Linux/macOS users with Make can also use the targets in [Makefile](Makefile).
+
+## Project map
+
+| Path | Purpose |
+| --- | --- |
+| [src/asr/](src/asr/) | Data generation, training, export, and transcription |
+| [src/agent/](src/agent/) | Persona, tools, and LangGraph workflow |
+| [src/rag/](src/rag/) | Corpus ingestion and retrieval |
+| [src/guardrails/](src/guardrails/) | Input checks, groundedness checks, and PII policy |
+| [src/tts/](src/tts/) | Sentence chunking, Kokoro, optional Chatterbox |
+| [src/server/](src/server/) | FastAPI `/converse` and `/ask` routes |
+| [static/index.html](static/index.html) | Local browser microphone interface |
+| [evals/](evals/) and [tests/](tests/) | Evaluation harness and unit tests |
+| [docs/ASR_RETRAINING.md](docs/ASR_RETRAINING.md) | Recovery-run reproduction steps |
+| [docs/HOSTING.md](docs/HOSTING.md) | Showcase publishing and interactive hosting requirements |
+
+## Data, privacy, and limitations
+
+The Markdown corpus and selected evaluation fixtures **are committed publicly**. Raw audio, model downloads, the vector index, and response caches are ignored by Git. Audio is processed on the application host; transcripts, conversation context, and retrieved passages can be sent to Gemini. Local response caches may contain prompt/response content. Review corpus content and the provider's terms before using private information.
+
+The app is a local prototype. Public interactive hosting needs HTTPS, authenticated or otherwise controlled access, usage limits, upload/connection limits, and an appropriate data-retention policy. The existing server does not implement these protections. Barge-in and optional voice cloning are not part of the default interaction.
+
+## Author and licensing
+
+Built by [Rababb Pannu](https://github.com/Rababb-P). No repository-wide license is currently included. Third-party libraries, datasets, and models retain their respective licenses; the exported Whisper artifacts include a [Whisper license notice](artifacts/asr/whisper-small-lora/WHISPER_LICENSE).
